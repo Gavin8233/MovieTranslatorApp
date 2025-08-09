@@ -4,7 +4,7 @@
 
 #include <string>
 inline std::string GET_RESOURCE_FOLDER_PATH() {
-
+// environment var override
 const char* resource_env = std::getenv("MOVIE_APP_RESOURCES_PATH");
 if (resource_env) {
     
@@ -13,20 +13,7 @@ if (resource_env) {
 }
 // default to 
 #ifdef __APPLE__
-    char path[1024];
-    uint32_t size = sizeof(path);
-
-    if (_NSGetExecutablePath(path, &size) == 0) {
-
-        std::string p(path);
-        auto contents = p.substr(0, p.find("MacOS/")) + "Resources/resources/";
-        return contents;
-
-    } else {
-
-        return "./resources/";
-
-    }
+    return "/usr/local/MovieTranslatorApp.app/Contents/resources/"
 #elif _WIN32
     return "C:/Program Files/MovieTranslatorApp/share/MovieTranslatorApp/resources/";
 #else 
@@ -35,7 +22,7 @@ if (resource_env) {
 }
 
 inline std::string GET_SHADER_FOLDER_PATH() {
-
+// environment var override
 const char* shader_env = std::getenv("MOVIE_APP_SHADER_PATH");
 if (shader_env) {
 
@@ -44,20 +31,7 @@ if (shader_env) {
 }
 // default to
 #ifdef __APPLE__
-    char path[1024];
-    uint32_t size = sizeof(path);
-
-    if (_NSGetExecutablePath(path, &size) == 0) {
-
-        std::string p(path);
-        auto contents = p.substr(0, p.find("MacOS/")) + "Resources/shaders/";
-        return contents;
-
-    } else {
-
-        return "./shaders/";
-
-    }
+    return "/usr/local/MovieTranslatorApp.app/Contents/resources/"
 #elif _WIN32
     return "C:/Program Files/MovieTranslatorApp/share/MovieTranslatorApp/shaders/";
 #else 

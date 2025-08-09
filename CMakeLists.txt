@@ -228,11 +228,11 @@ if(APPLE)
   )
 
   install(DIRECTORY "${CMAKE_SOURCE_DIR}/resources"
-    DESTINATION MovieTranslatorApp.app/Contents/Resources/resources
+    DESTINATION MovieTranslatorApp.app/Contents
   )
 
   install(DIRECTORY "${CMAKE_SOURCE_DIR}/shaders"
-    DESTINATION MovieTranslatorApp.app/Contents/Resources/shaders
+    DESTINATION MovieTranslatorApp.app/Contents
   )
 else() # Linux and Windows
   install(TARGETS MovieTranslatorApp
