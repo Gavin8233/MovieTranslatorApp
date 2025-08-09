@@ -13,6 +13,7 @@ namespace subtitleUtil {
 
     void destroy_httplib_client() {
 
+        httplib_client->stop();
         delete httplib_client;
 
     }

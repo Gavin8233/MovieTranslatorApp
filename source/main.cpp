@@ -216,6 +216,4 @@ int main(int argc, char* argv[]) {
 
     player.start();
 
-    subtitleUtil::destroy_httplib_client();
-
 }

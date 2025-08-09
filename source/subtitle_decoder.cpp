@@ -15,6 +15,8 @@ subtitleDecoder::~subtitleDecoder() {
 
     file.close();
 
+    subtitleUtil::destroy_httplib_client();
+
 }
 
 subtitleDecoder::subtitleDecoder(const std::string& srt_file_path) :
