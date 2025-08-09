@@ -56,12 +56,12 @@ namespace CONSTANTS {
         constexpr float SETTINGS_WHEEL_X_SCALE = 0.1f; // to make settings wheel small
         constexpr float SETTINGS_WHEEL_Y_SCALE = 0.1f; // same as above
 
-        constexpr float LANGUAGE_MENU_X_OFFSET = 0.42f; // bring to the right side of screen
-        constexpr float LANGUAGE_MENU_Y_OFFSET = 0.2f; // bring to just above the settings menu
+        constexpr float LANGUAGE_MENU_X_OFFSET = 0.75f; // bring to the right side of screen
+        constexpr float LANGUAGE_MENU_Y_OFFSET = 0.1f; // bring to just above the settings menu
         constexpr float LANGUAGE_MENU_X_SCALE_DOWN = 0.5f; 
         constexpr float LANGUAGE_MENU_Y_SCALE_DOWN = LANGUAGE_MENU_X_SCALE_DOWN;
 
-        constexpr float SETTINGS_MENU_X_OFFSET = 0.80f; // bring to the right side of screen
+        constexpr float SETTINGS_MENU_X_OFFSET = 0.75f; // bring to the right side of screen
         constexpr float SETTINGS_MENU_Y_OFFSET = -0.42f; // bring to almost bottom 
         constexpr float SETTINGS_MENU_X_SCALE_DOWN = 0.8f;
         constexpr float SETTINGS_MENU_Y_SCALE_DOWN = 0.6f;

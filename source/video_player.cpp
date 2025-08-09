@@ -7,7 +7,14 @@ bool videoPlayer::SUBTITLE_DELAY_ALTERED = false;
 bool videoPlayer::LANGUAGE_CHOICES_ALTERED = false;
 bool videoPlayer::SETTINGS_MENU_ALTERED = false;
 bool videoPlayer::SUBTITLE_LOCATION_ALTERED = false;
+bool videoPlayer::FULLSCREEN_ENABLED = false;
+bool videoPlayer::fullscreen_clicked = false;
+
 unsigned int videoPlayer::LANGUAGE_ALTERED = 0;
+int videoPlayer::last_windowed_mode_x = 0;
+int videoPlayer::last_windowed_mode_y = 0;
+int videoPlayer::last_windowed_mode_width = 0;
+int videoPlayer::last_windowed_mode_height = 0;
 
 videoPlayer::~videoPlayer() {
 
@@ -145,20 +152,16 @@ void videoPlayer::start() {
     constexpr int draw_overlay_time_ms = 1250;
     constexpr int update_progress_delay_ms = 5000;
     
-    GLint viewport_data[4];
     double xpos, ypos;
-    float curr_screen_width, curr_screen_height;
+    int curr_screen_width, curr_screen_height;
     float mouse_x_normalized, mouse_y_normalized;
 
     set_new_language_display_text();
     set_new_menu_display_text();
 
-    glGetIntegerv(GL_VIEWPORT, viewport_data);
+    glfwGetWindowSize(GLutil::window, &curr_screen_width, &curr_screen_height);
 
-    curr_screen_width = float(viewport_data[2]);
-    curr_screen_height = float(viewport_data[3]);
-
-    current_data.subtitle_location = GET_SUBTITLE_LOCATION(userPreferences::user_video_preferences.subtitle_location, curr_screen_width, curr_screen_height);
+    current_data.subtitle_location = GET_SUBTITLE_LOCATION(userPreferences::user_video_preferences.subtitle_location, float(curr_screen_width), float(curr_screen_height));
 
     glfwSwapInterval(1);
 
@@ -238,17 +241,15 @@ void videoPlayer::start() {
 
         }
 
-        glGetIntegerv(GL_VIEWPORT, viewport_data);
-
-        curr_screen_width = float(viewport_data[2]);
-        curr_screen_height = float(viewport_data[3]);
+        glfwGetWindowSize(GLutil::window, &curr_screen_width, &curr_screen_height);
 
         if (curr_screen_height != current_data.screen_height || curr_screen_width != current_data.screen_width) {
 
-            current_data.screen_height = curr_screen_height;
-            current_data.screen_width = curr_screen_width;
+            current_data.screen_height = float(curr_screen_height);
+            current_data.screen_width = float(curr_screen_width);
 
             renderer->set_font_projection(current_data.screen_width, current_data.screen_height);
+            current_data.subtitle_location = GET_SUBTITLE_LOCATION(userPreferences::user_video_preferences.subtitle_location, float(current_data.screen_width), float(current_data.screen_height));
 
         }
 
@@ -595,6 +596,41 @@ void videoPlayer::process_input(GLFWwindow* window) {
 
     }
 
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+
+        if (!fullscreen_clicked) {
+
+            std::cout << "\nTRUE!";
+
+            fullscreen_clicked = true;
+            FULLSCREEN_ENABLED = !FULLSCREEN_ENABLED;
+
+            if (FULLSCREEN_ENABLED) {
+
+                glfwGetWindowPos(GLutil::window, &last_windowed_mode_x, &last_windowed_mode_y);
+                glfwGetWindowSize(GLutil::window, &last_windowed_mode_width, &last_windowed_mode_height);
+
+                GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+                const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+                glfwSetWindowMonitor(GLutil::window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+
+            } else {
+
+                glfwSetWindowMonitor(window, nullptr, last_windowed_mode_x, last_windowed_mode_y, last_windowed_mode_width, last_windowed_mode_height, 0);
+
+                glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_TRUE);
+
+            }
+
+        }
+
+    } else {
+
+        fullscreen_clicked = false;
+
+    }
+
 }
 
 void videoPlayer::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
@@ -605,14 +641,11 @@ void videoPlayer::mouse_button_callback(GLFWwindow* window, int button, int acti
 
         glfwGetCursorPos(window, &xpos, &ypos);
 
-        GLint viewport_data[4];
-        glGetIntegerv(GL_VIEWPORT, viewport_data);
-
-        const float screen_width = float(viewport_data[2]);
-        const float screen_height = float(viewport_data[3]);
+        int width, height;
+        glfwGetWindowSize(GLutil::window, &width, &height);
         
-        const float mouse_y_normalized = 1.0f - 2.0f * float(ypos) / screen_height;
-        const float mouse_x_normalized = -1.0f + 2.0f * float(xpos) / screen_width;
+        const float mouse_y_normalized = 1.0f - 2.0f * float(ypos) / height;
+        const float mouse_x_normalized = -1.0f + 2.0f * float(xpos) / width;
 
         for (const Button& b : Buttons::buttons) {
 
@@ -664,14 +697,11 @@ void videoPlayer::scroll_callback(GLFWwindow* window, double xoff, double yoff) 
 
     glfwGetCursorPos(window, &xpos, &ypos);
 
-    GLint viewport_data[4];
-    glGetIntegerv(GL_VIEWPORT, viewport_data);
-
-    const float screen_width = float(viewport_data[2]);
-    const float screen_height = float(viewport_data[3]);
+    int width, height;
+    glfwGetWindowSize(GLutil::window, &width, &height);
         
-    const float mouse_y_normalized = 1.0f - 2.0f * float(ypos) / screen_height;
-    const float mouse_x_normalized = -1.0f + 2.0f * float(xpos) / screen_width;
+    const float mouse_y_normalized = 1.0f - 2.0f * float(ypos) / height;
+    const float mouse_x_normalized = -1.0f + 2.0f * float(xpos) / width;
 
     const buttonLocation position = Buttons::get_button_location(buttonName::LANGUAGE_SELECT_MENU);
 

@@ -115,6 +115,7 @@ class videoPlayer {
         static bool SUBTITLE_LOCATION_ALTERED;
         static bool LANGUAGE_CHOICES_ALTERED;
         static bool SETTINGS_MENU_ALTERED;
+        static bool FULLSCREEN_ENABLED;
 
         // if language was altered this variable is set to the option the user chose(1, 2, 3 or 4)
         static unsigned int LANGUAGE_ALTERED;
@@ -126,6 +127,12 @@ class videoPlayer {
         /* if space was clicked since the glfw get key function returns true many times this variable is set true to avoid that and set back to false when glfw does not get space bar click */
 
         bool space_was_clicked;
+        static bool fullscreen_clicked;
+
+        static int last_windowed_mode_x;
+        static int last_windowed_mode_y;
+        static int last_windowed_mode_width;
+        static int last_windowed_mode_height;
 
 };
 

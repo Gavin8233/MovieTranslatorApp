@@ -32,9 +32,27 @@ namespace GLutil {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+        
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 
-        window = glfwCreateWindow(1920, 1080, "Translater App", NULL, NULL);
+        if (!monitor) {
+
+            throw std::runtime_error("FAILED TO FIND PRIMARY MONITOR");
+
+        }
+
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+        if (!mode) {
+
+            throw std::runtime_error("FAILED TO GET VIDEO MODE");
+
+        }
+
+        int width = mode->width;
+        int height = mode->height;
+
+        window = glfwCreateWindow(width, height, "Translater App", NULL, NULL);
 
         if (window == nullptr) {
 
@@ -50,7 +68,7 @@ namespace GLutil {
 
         }
 
-        glViewport(0, 0, 1920, 1080);
+        glViewport(0, 0, width, height);
 
     }
 
