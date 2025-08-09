@@ -1,0 +1,101 @@
+{
+
+	"width": 628,
+	"height": 268,
+
+	"buttons" : [
+	{
+
+		"name": "FONT_COLOR_BACK",
+		"tlx": 305,
+		"tly": 62,
+		"brx": 332,
+		"bry": 91
+
+
+	},
+	{
+
+		"name": "FONT_COLOR_FORWARD",
+		"tlx": 407,
+		"tly": 61,
+		"brx": 430,
+		"bry": 90
+
+	},
+	{
+		
+		"name": "SUBTITLE_DELAY_MINUS",
+		"tlx": 340,
+		"tly": 105,
+		"brx": 371,
+		"bry": 131
+
+	},
+	{
+		
+		"name": "SUBTITLE_DELAY_PLUS",
+		"tlx": 438,
+		"tly": 105,
+		"brx": 464,
+		"bry": 132
+
+	},
+	{
+
+		"name": "LANGUAGE_SELECT_BOX",
+		"tlx": 304,
+		"tly": 152,
+		"brx": 340,
+		"bry": 165
+
+	},
+	{
+
+		"name": "LANGUAGE_SELECT",
+		"tlx": 350,
+		"tly": 148,
+		"brx": 363,
+		"bry": 169
+
+	},
+	{
+
+		"name": "SUBTITLE_LOCATION_BACK",
+		"tlx": 380,
+		"tly": 183,
+		"brx": 404,
+		"bry": 209
+
+	},
+	{
+		
+		"name": "SUBTITLE_LOCATION_FORWARD",
+		"tlx": 480,
+		"tly": 183,
+		"brx": 506,
+		"bry": 208
+
+	},
+	{
+
+		"name": "SUBTITLE_SCALE_MINUS",
+		"tlx": 340,
+		"tly": 225,
+		"brx": 370,
+		"bry": 254
+
+	},
+	{
+
+		"name": "SUBTITLE_SCALE_PLUS",
+		"tlx": 436,
+		"tly": 225,
+		"brx": 465,
+		"bry": 252 
+
+	}
+	]
+
+
+}

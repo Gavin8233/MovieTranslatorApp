@@ -1,0 +1,46 @@
+{
+
+	"width": 62,
+	"height": 128,
+
+	"buttons": [
+	{
+
+		"name": "LANGUAGE_CHOICE_ONE",
+		"tlx": 3,
+		"tly": 63,
+		"brx": 59,
+		"bry": 77
+
+	},
+	{
+
+		"name": "LANGUAGE_CHOICE_TWO",
+		"tlx": 3,
+		"tly": 78,
+		"brx": 58,
+		"bry": 95
+
+	},
+	{
+
+		"name": "LANGUAGE_CHOICE_THREE",
+		"tlx": 4,
+		"tly": 97,
+		"brx": 59,
+		"bry": 113
+
+	},
+	{
+
+		"name": "LANGUAGE_CHOICE_FOUR",
+		"tlx": 2,
+		"tly": 115,
+		"brx": 59,
+		"bry": 127
+
+	}
+	]
+
+
+}
