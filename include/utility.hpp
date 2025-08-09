@@ -13,7 +13,7 @@ if (resource_env) {
 }
 // default to 
 #ifdef __APPLE__
-    return "/usr/local/MovieTranslatorApp.app/Contents/resources/"
+    return "/usr/local/MovieTranslatorApp.app/Contents/resources/";
 #elif _WIN32
     return "C:/Program Files/MovieTranslatorApp/share/MovieTranslatorApp/resources/";
 #else 
@@ -31,7 +31,7 @@ if (shader_env) {
 }
 // default to
 #ifdef __APPLE__
-    return "/usr/local/MovieTranslatorApp.app/Contents/resources/"
+    return "/usr/local/MovieTranslatorApp.app/Contents/resources/";
 #elif _WIN32
     return "C:/Program Files/MovieTranslatorApp/share/MovieTranslatorApp/shaders/";
 #else 
