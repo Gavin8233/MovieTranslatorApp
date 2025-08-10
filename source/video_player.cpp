@@ -189,6 +189,12 @@ void videoPlayer::start() {
             subtitle_decoder->seek_subtitle_location(display_time_ms);
             audio_player->clear_queue_and_restart();
 
+            GLOBAL_STATES::VIDEO_SEEK_REQUESTED = false;
+
+            video_decoder->start_decoder_threads();
+            subtitle_decoder->start_decoder_thread();
+            audio_player->startup_thread();
+
             current_data.subtitle.display_timestamp.end = 0; // in case subtitle had not displayed yet set the end timestamp = 0 so a new one is displayed(the updated one)
             current_data.last_progress_bar_update_time_ms = 0; // for same basic reason
 
@@ -434,7 +440,7 @@ void videoPlayer::sync_audio() {
 
 void videoPlayer::sync_video() {
 
-    if (video_decoder->has_video_data() && video_decoder->get_current_video_pts_val() <= elapsed) {
+    if (video_decoder->has_video_data() && video_decoder->get_current_video_pts_val() <= elapsed - 300) { // - 300 to let video get a little ahead if fps is held back
 
         current_data.video_data = video_decoder->get_next_video_data();
         
@@ -599,8 +605,6 @@ void videoPlayer::process_input(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
 
         if (!fullscreen_clicked) {
-
-            std::cout << "\nTRUE!";
 
             fullscreen_clicked = true;
             FULLSCREEN_ENABLED = !FULLSCREEN_ENABLED;

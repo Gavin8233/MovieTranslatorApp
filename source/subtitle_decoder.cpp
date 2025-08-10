@@ -3,7 +3,7 @@
 
 subtitleDecoder::~subtitleDecoder() {
 
-    local_seek_requested = true; // to allow thread to join
+    GLOBAL_STATES::VIDEO_SEEK_REQUESTED = true; // to allow thread to join
 
     decoder_thread.condition.notify_all();
 
@@ -21,8 +21,7 @@ subtitleDecoder::~subtitleDecoder() {
 
 subtitleDecoder::subtitleDecoder(const std::string& srt_file_path) :
 
-start_position { 0 },
-local_seek_requested { false }
+start_position { 0 }
 
 {
 
@@ -40,11 +39,11 @@ void subtitleDecoder::decode_loop() {
     file.clear();
     file.seekg(start_position);
 
-    while (!local_seek_requested) {
+    while (!GLOBAL_STATES::VIDEO_SEEK_REQUESTED) {
 
         std::unique_lock<std::mutex> lock(decoder_thread.mutex);
 
-        decoder_thread.condition.wait(lock, [&]() { return subtitle_queue.size() < 10 || local_seek_requested; }); 
+        decoder_thread.condition.wait(lock, [&]() { return subtitle_queue.size() < 10 || GLOBAL_STATES::VIDEO_SEEK_REQUESTED; }); 
 
         lock.unlock();
 
@@ -97,8 +96,6 @@ void subtitleDecoder::decode_loop() {
 
 void subtitleDecoder::seek_subtitle_location(const int64_t& seek_to) {
 
-    local_seek_requested = true;
-
     decoder_thread.condition.notify_all();
 
     if (decoder_thread.thread.joinable()) {
@@ -141,13 +138,9 @@ void subtitleDecoder::seek_subtitle_location(const int64_t& seek_to) {
 
     }
 
-    local_seek_requested = false;
-
     decoder_thread.mutex.lock();
     subtitle_queue.clear();
     decoder_thread.mutex.unlock();
-
-    start_decoder_thread();
 
 }
 

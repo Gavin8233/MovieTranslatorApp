@@ -28,10 +28,6 @@ class subtitleDecoder {
 
     private:
 
-        // To be honest, I cannot remember why a local seek variable was needed but something with the global variable was causing this thread to play audio back in a 10ms loop over and over. 
-        // Very hacky
-        bool local_seek_requested;
-
         void decode_loop();
 
         Thread decoder_thread;

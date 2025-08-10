@@ -550,10 +550,6 @@ void videoDecoder::seek_video(int64_t& seek_target_seconds) {
     flag = (scaled_timestamp < 0) ? AVSEEK_FLAG_BACKWARD : 0;
     seek_t(scaled_timestamp, audio_context.codec_context, audio_stream, flag);
 
-    GLOBAL_STATES::VIDEO_SEEK_REQUESTED = false;
-
-    start_decoder_threads();
-
 }
 
 void videoDecoder::flush_queues() {

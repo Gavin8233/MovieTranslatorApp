@@ -221,7 +221,6 @@ void audioPlayer::clear_queue_and_restart() {
     audio_player_thread.mutex.unlock();
 
     init_buffers_and_source(true);
-    startup_thread();
 
 }
 
