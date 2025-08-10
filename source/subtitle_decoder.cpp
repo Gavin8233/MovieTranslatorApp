@@ -15,6 +15,7 @@ subtitleDecoder::~subtitleDecoder() {
 
     file.close();
 
+    std::cout << "\nStopping HTTPLib Client";
     subtitleUtil::destroy_httplib_client();
 
 }

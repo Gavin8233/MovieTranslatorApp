@@ -32,7 +32,7 @@ class videoDecoder {
 
     public:
 
-        videoDecoder(const std::string& video_file_path, const bool& high_performance);
+        videoDecoder(const std::string& video_file_path, const int& threads);
         ~videoDecoder();
 
         void start_decoder_threads();

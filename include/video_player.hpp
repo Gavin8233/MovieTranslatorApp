@@ -71,7 +71,7 @@ class videoPlayer {
 
     public:
 
-        videoPlayer(const std::string& video_file_path, const std::string& subtitle_srt_path, const std::string& font_file_path, const bool& high_performance);
+        videoPlayer(const std::string& video_file_path, const std::string& subtitle_srt_path, const std::string& font_file_path, const int& threads);
         ~videoPlayer();
 
         void start();

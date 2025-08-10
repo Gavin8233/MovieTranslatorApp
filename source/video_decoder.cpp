@@ -47,7 +47,7 @@ videoDecoder::~videoDecoder() {
 
 }
 
-videoDecoder::videoDecoder(const std::string& video_file_path, const bool& high_performance) :
+videoDecoder::videoDecoder(const std::string& video_file_path, const int& threads) :
 
 format_context { nullptr },
 video_frame { nullptr },
@@ -69,7 +69,7 @@ audio_stream { -1 }
 {
 
     // in case of exception
-    std::string error_str = "\nEnsure that the video you provided is a valid mp4 file."
+    std::string error_str = "\nEnsure that the video you provided is a valid video file which FFmpeg can decode."
     "\nEnsure that the argument for the video file paths do not look like --path or -path."
     "\nTry running the program with './MovieTranslatorApp filepath1 filepath2 printinfo'"
     "\nThis will print the file paths you pass in."
@@ -91,7 +91,7 @@ audio_stream { -1 }
 
     if (avformat_find_stream_info(format_context, nullptr) < 0) {
 
-        std::cerr << "\nERROR: Failed to find stream info for mp4 file." << error_str;
+        std::cerr << "\nERROR: Failed to find stream info for video file." << error_str;
         throw std::runtime_error("Failed to find video stream info");
 
     }
@@ -116,14 +116,14 @@ audio_stream { -1 }
 
     if (video_stream == -1) {
 
-        std::cerr << "\nERROR: Failed to find the video stream for the mp4 file." << error_str;
+        std::cerr << "\nERROR: Failed to find the video stream for the video file." << error_str;
         throw std::runtime_error("Failed to find video stream");
 
     }
 
     if (audio_stream == -1) {
 
-        std::cerr << "\nERROR: Failed to find audio stream for the mp4 file." << error_str;
+        std::cerr << "\nERROR: Failed to find audio stream for the video file." << error_str;
         throw std::runtime_error("Failed to find audio stream");
 
     }
@@ -142,9 +142,9 @@ audio_stream { -1 }
 
     video_codec_context = avcodec_alloc_context3(video_codec);
 
-    if (high_performance) {
+    if (threads > 1) {
 
-        video_codec_context->thread_count = 5;
+        video_codec_context->thread_count = threads;
         video_codec_context->thread_type = FF_THREAD_FRAME;
 
     }

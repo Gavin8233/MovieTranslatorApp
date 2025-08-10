@@ -31,7 +31,7 @@ videoPlayer::~videoPlayer() {
 
 }
 
-videoPlayer::videoPlayer(const std::string& video_file_path, const std::string& subtitle_srt_path, const std::string& font_file_path, const bool& high_performance) :
+videoPlayer::videoPlayer(const std::string& video_file_path, const std::string& subtitle_srt_path, const std::string& font_file_path, const int& threads) :
 
 subtitle_decoder { nullptr },
 renderer { nullptr },
@@ -52,7 +52,7 @@ space_was_clicked { false }
     renderer = new Renderer(font_file_path);
     renderer->init_shaders();
 
-    video_decoder = new videoDecoder(video_file_path, high_performance);
+    video_decoder = new videoDecoder(video_file_path, threads);
     video_duration = video_decoder->get_video_length();
 
     subtitle_decoder = new subtitleDecoder(subtitle_srt_path);
