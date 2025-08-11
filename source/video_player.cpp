@@ -219,9 +219,11 @@ void videoPlayer::start() {
         if (LANGUAGE_ALTERED != 0) {
 
             userPreferences::alter_translate_to(GET_LANGUAGE_CHARACTER_CODE(subtitleUtil::get_language_choice(LANGUAGE_ALTERED)));
+            set_new_menu_display_text();
 
             LANGUAGE_ALTERED = 0;
-            subtitle_decoder->seek_subtitle_location(elapsed); // to reset subtitles and re translate
+            subtitle_decoder->seek_subtitle_location(elapsed, true); // to reset subtitles and re translate
+            subtitle_decoder->start_decoder_thread();
             
             while (!subtitle_decoder->has_subtitle()) {} // we do this so that subtitles are displayed again immediately after switching and are correct to the switch
             current_data.subtitle = subtitle_decoder->get_next_subtitle();

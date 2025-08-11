@@ -21,12 +21,15 @@ class subtitleDecoder {
         // If seek, since SRT files are not that big we just find the correct timestamp and seek to that location in the file. 
         // This works because when the decoder thread is started it seeks to the start_position variable, which is set to file beginning in the constructor and when first ran and whenever the 
         // seek subtitle function is ran at the end seek_location will be set and when the decoder loop is restarted it will seek to the correct location. 
-        void seek_subtitle_location(const int64_t& seek_to);
+        // local seek var is set true if just this thread is being reset, to avoid having to set global seek requested true and causing thread issues for the other decoders.
+        void seek_subtitle_location(const int64_t& seek_to, bool local_seek = false);
 
         // When subtitle delay is altered the queued delays need to reflect that 
         void adjust_queued_subtitle_delays(const int& delay);
 
     private:
+
+        bool local_seek_requested;
 
         void decode_loop();
 

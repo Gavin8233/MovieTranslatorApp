@@ -206,7 +206,7 @@ private:
 
     }
 
-    bool handle_str(const int& argc, char* argv[], std::string& val, int& i, std::string& argument) {
+    bool handle_str(const int& argc, char* argv[], std::string& val, int& i, const std::string& argument) {
 
         if (i + 1 >= argc) {
 
