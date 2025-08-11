@@ -16,24 +16,55 @@ std::unordered_set<std::string> commands {
 "-libreport",
 "-fontfile"
 };
-// allowed extensions for each file type
+// allowed extensions for each file type. extension is mapped to extension character length
 std::unordered_set<std::string> video_extensions {
-
 ".mp4",
-".mkv"
-
+".mkv",
+".avi",
+".mov",
+".flv",
+".webm",
+".wmv",
+".mpg",
+".mpeg",
+".m4v",
+".3gp",
+".3g2",
+".mts",
+".m2ts",
+".vob"
 };
+
 std::unordered_set<std::string> srt_extensions {
-
 ".srt",
-".txt"
-
+".txt",
+".sub",
+".sbv",
+".scr",
+".caption",
+".vtt",
+".dfxp",
+".ttml",
+".cap",
+".ssa",
+".rt"
 };
+
 std::unordered_set<std::string> font_extensions {
-
 ".ttf",
-".TTF"
-
+".ttc",
+".otf",
+".woff",
+".woff2",
+".pfa",
+".pfb",
+".pcf",
+".bdf",
+".fnt",
+".pfr",
+".afm",
+".pfm",
+".cid"
 };
 
 struct Vars {
@@ -84,7 +115,7 @@ public:
         vars.video_file_path = argv[1];
         vars.srt_file_path = argv[2];
 
-        if (!check_file(video_extensions, 4, vars.video_file_path) || !check_file(srt_extensions, 4, vars.srt_file_path)) {
+        if (!check_file(video_extensions, vars.video_file_path) || !check_file(srt_extensions, vars.srt_file_path)) {
 
             throw std::runtime_error(fail_message);
 
@@ -97,8 +128,8 @@ public:
 
             if (arg == "-printinfo") {
 
-                std::cout << "\nVideo File Path: " << vars.video_file_path;
-                std::cout << "\nSubtitle File Path: " << vars.srt_file_path;
+                std::cout << "Video File Path: " << vars.video_file_path << std::endl;
+                std::cout << "Subtitle File Path: " << vars.srt_file_path << std::endl;
 
             }
 
@@ -110,7 +141,7 @@ public:
 
                 }
 
-                std::cout << "\nMulti-threaded video decoding enabled. Thread count: " << vars.threads;
+                std::cout << "Multi-threaded video decoding enabled. Thread count: " << vars.threads << std::endl;
 
             }
 
@@ -122,7 +153,7 @@ public:
 
                 }
 
-                std::cout << "\nSetting port to: " << vars.port;
+                std::cout << "Setting port to: " << vars.port << std::endl;
 
             }
 
@@ -134,7 +165,7 @@ public:
 
                 }
 
-                std::cout << "\nSetting IP to: " << vars.ip;
+                std::cout << "Setting IP to: " << vars.ip << std::endl;
 
             }
 
@@ -146,19 +177,19 @@ public:
 
                 }
 
-                if (!check_file(font_extensions, 4, vars.font_file_path)) {
+                if (!check_file(font_extensions, vars.font_file_path)) {
 
                     throw std::runtime_error(fail_message);
 
                 }
 
-                std::cout << "\nSetting Font File Path to: " << vars.font_file_path;
+                std::cout << "Setting Font File Path to: " << vars.font_file_path << std::endl;
 
             } 
         
             else {
 
-                std::cerr << "\nArgument: " << arg << " is invalid.";
+                std::cerr << "Argument: " << arg << " is invalid." << std::endl;
 
             }
 
@@ -172,7 +203,7 @@ private:
 
         if (i + 1 >= argc) {
 
-            std::cerr << "\n" << err_message << "\nArgument " << argument << " is missing a value.";
+            std::cerr << "\n" << err_message << "\nArgument " << argument << " is missing a value." << std::endl;
             return false;
 
         }
@@ -183,7 +214,7 @@ private:
 
             std::cerr << "\nInvalid value passed into " << argument << "."
             "\nValue passed in was: " << argplus << "."
-            "\nMake sure you pass in a value after " << argument << ".";
+            "\nMake sure you pass in a value after " << argument << "." << std::endl;
             return false;
 
         }
@@ -195,9 +226,10 @@ private:
         }
         catch (std::exception& e) {
 
+            std::cerr << e.what() << std::endl;
             std::cerr << "\nValue for command " << argument << " is not an integer."
             "\nValue set for " << argument << " was " << argplus << "."
-            "\nType a valid integer and try again.";
+            "\nType a valid integer and try again." << std::endl;
             return false;
 
         }
@@ -210,7 +242,7 @@ private:
 
         if (i + 1 >= argc) {
 
-            std::cerr << "\n" << err_message << "\nArgument " << argument << " is missing a value.";
+            std::cerr << "\n" << err_message << "\nArgument " << argument << " is missing a value." << std::endl;
             return false;
 
         }
@@ -221,7 +253,7 @@ private:
 
             std::cerr << "\nValue for " << argument << " is invalid."
             "\nValue passed in was: " << val << "."
-            "\nMake sure you add a value after " << argument << ".";
+            "\nMake sure you add a value after " << argument << "." << std::endl;
             return false;
 
         }
@@ -230,18 +262,31 @@ private:
 
     }
 
-    bool check_file(const std::unordered_set<std::string>& allowed_extensions, const int extension_length, const std::string& val) {
+    bool check_file(const std::unordered_set<std::string>& allowed_extensions, const std::string& val) {
 
-        std::string check = val.substr(val.size() - extension_length);
+        std::string check;
+        std::size_t slash = val.find_last_of("/\\");
+        std::string extension = (slash == std::string::npos) ? val : val.substr(slash + 1);
 
-        if (!allowed_extensions.count(check)) {
+        std::size_t dot = extension.find_last_of('.');
+        if (dot == std::string::npos) {
+
+            std::cerr << "\nNo extension found in " << val << "." << std::endl;
+
+            return false;
+
+        }
+
+        extension = extension.substr(dot);
+
+        if (!allowed_extensions.count(extension)) {
 
             std::cerr << "\nInvalid extension in " << val << "."
-            "\nEXPECTED: ";
+            "\nEXPECTED: " << std::endl;
 
             for (const std::string& ext : allowed_extensions) {
 
-                std::cerr << "\n" << ext;
+                std::cerr << ext << std::endl;
 
             }
 
