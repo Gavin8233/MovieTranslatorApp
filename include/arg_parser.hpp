@@ -16,7 +16,7 @@ std::unordered_set<std::string> commands {
 "-libreport",
 "-fontfile"
 };
-// allowed extensions for each file type. extension is mapped to extension character length
+// allowed extensions for each file type
 std::unordered_set<std::string> video_extensions {
 ".mp4",
 ".mkv",
