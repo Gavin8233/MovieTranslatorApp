@@ -7,5 +7,6 @@ namespace GLOBAL_STATES {
     bool VIDEO_SEEK_REQUESTED;
 
     std::condition_variable VIDEO_PAUSED_CONDITION;
+    std::mutex VIDEO_PAUSED_MUTEX;
 
 }

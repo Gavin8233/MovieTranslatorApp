@@ -440,7 +440,7 @@ void videoDecoder::read_frame_loop() {
 
         if (GLOBAL_STATES::VIDEO_PAUSED) {
 
-            std::unique_lock<std::mutex> lock(read_frame_thread.mutex);
+            std::unique_lock<std::mutex> lock(GLOBAL_STATES::VIDEO_PAUSED_MUTEX);
             GLOBAL_STATES::VIDEO_PAUSED_CONDITION.wait(lock, [&] { return !GLOBAL_STATES::VIDEO_PAUSED; });
 
         }
