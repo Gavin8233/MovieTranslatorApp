@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.1...4.0)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 project(MovieTranslatorApp)
 
 set(CMAKE_CXX_STANDARD 14)
