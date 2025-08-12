@@ -217,17 +217,19 @@ namespace GLutil {
 
     void init_overlay_textures() {
 
+        const std::string tex_path = GET_RESOURCE_FOLDER_PATH() + "textures/";
+
         const std::string err_message = "\nDid you run cmake --install .?"
-        "\nPath=" << GET_RESOURCE_FOLDER_PATH() + "textures/"
+        "\nPath=" + tex_path + ""
         "\nVerify that this path exists."
         "\nIn this folder you should have:\nbar.png\nsettings_wheel.png\nsettingsmenu.png\nlanguageselect.png"
-        "\nIf you do not, redownload the textures from the GitHub repository and place them in the expected path." << std::endl;
+        "\nIf you do not, redownload the textures from the GitHub repository and place them in the expected path.";
 
         unsigned int progress_bar_texture_id;
         glActiveTexture(GL_TEXTURE0 + CONSTANTS::TEXTURES::PROGRESS_BAR_TEXTURE);
         try {
 
-            progress_bar_texture_id = load_texture(GET_RESOURCE_FOLDER_PATH() + "textures/bar.png");
+            progress_bar_texture_id = load_texture(tex_path + "bar.png");
 
         }
         catch (std::exception& e) {
@@ -240,7 +242,7 @@ namespace GLutil {
         glActiveTexture(GL_TEXTURE0 + CONSTANTS::TEXTURES::SETTINGS_WHEEL_TEXTURE);
         try {
 
-            settings_wheel_texture_id = load_texture(GET_RESOURCE_FOLDER_PATH() + "textures/settings_wheel.png");
+            settings_wheel_texture_id = load_texture(tex_path + "settings_wheel.png");
 
         }
         catch (std::exception& e) {
@@ -253,7 +255,7 @@ namespace GLutil {
         glActiveTexture(GL_TEXTURE0 + CONSTANTS::TEXTURES::SETTINGS_MENU_TEXTURE);
         try {
 
-            settings_menu_texture_id = load_texture(GET_RESOURCE_FOLDER_PATH() + "textures/settingsmenu.png");
+            settings_menu_texture_id = load_texture(tex_path + "settingsmenu.png");
 
         }
         catch (std::exception& e) {
@@ -266,7 +268,7 @@ namespace GLutil {
         glActiveTexture(GL_TEXTURE0 + CONSTANTS::TEXTURES::LANGUAGE_SELECT_TEXTURE);
         try {
 
-            language_select_menu_texture_id = load_texture(GET_RESOURCE_FOLDER_PATH() + "textures/languageselect.png");
+            language_select_menu_texture_id = load_texture(tex_path + "languageselect.png");
 
         }
         catch (std::exception& e) {

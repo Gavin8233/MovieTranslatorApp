@@ -84,7 +84,7 @@ void subtitleDecoder::decode_loop() {
                 translated_text_codepoints = Utility::get_codepoints_from_string(translated_text);
 
             }
-            catch (std:exception& e) {
+            catch (std::exception& e) {
 
                 std::cerr << e.what() << std::endl;
 
@@ -118,7 +118,7 @@ void subtitleDecoder::decode_loop() {
             translated_text_codepoints = Utility::get_codepoints_from_string(translated_text);
 
         }
-        catch (std:exception& e) {
+        catch (std::exception& e) {
 
             std::cerr << e.what() << std::endl;
 
