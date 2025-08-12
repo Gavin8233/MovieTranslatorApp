@@ -6,123 +6,112 @@
 
   To install, proceed to the **Getting Started** header.
 
-## Quickstart for Linux & Mac Users
-**Linux Users -** Ensure you have PulseAudio ALSA or PipeWire installed, or OpenAL will fail to find your default audio device and a full project redownload will be required. 
-
-LibreTranslate is required and has to be running before launching the executable. 
-Example: 
-  - ```libretranslate --host 0.0.0.0 --port 5000```
-
-Run the following:
-  - **If Linux:**
-    -  ```<your package manager> install libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev```
-    - ```<your package manager> install libopenal-dev```
-  - **If Mac:**
-    - ```<your package manager> install ffmpeg```
-  
-  - ```git clone https://github.com/Gavin8233/MovieTranslatorApp```
-  - ```cd MovieTranslatorApp```
-  - ```mkdir build```
-  - ```cd build```
-  - ```cmake ..```
-  - ```cmake --build .```
-  - ```cmake --install .```
-  - ```./MovieTranslatorApp path/to/video path/to/.srt```
-
-<br>
-
 # **MOVIE PLAYER**
 
-Custom media player built from scratch using OpenGL to draw video and FFmpeg to decode the video, with a custom SRT parser and subtitle translator which is reliant on the use of LibreTranslate. LibreTranslate is a translator API that is available online for self hosting. The app includes the following features:
-  - Ability to play any FFmpeg compatible video 
+Media player built from scratch using OpenGL to draw video and FFmpeg to decode the video, with a custom SRT parser and subtitle translator which is reliant on the use of LibreTranslate. LibreTranslate is a translator API that is available online for self hosting. The app includes the following features:
+  - Ability to play most FFmpeg compatible video files.
   - Modifiable subtitle delays, font colors, locations, and scale.
   - Real time language translation switching. 
-  - Interactive overlay all done with the mouse
-  - Seeking video and video pausing
+  - Interactive overlay all done with the mouse.
+  - Seeking video and video pausing.
 
 <br>
 
 And the following technical features:
 
-  - FFmpeg to manually decode the video and audio
+  - FFmpeg to decode the video and audio
   - OpenAL for playback of the decoded audio
   - HTTPLib and nlohmann::json for communication with the LibreTranslate API
   - OpenGL + GLAD + GLFW + Freetype for the display of the decoded video and subtitles
   - All major components are multithreaded for maximum performance
 
-This project was designed to help other language learners enjoy movies in their target language while boosting their comprehension skills. It allows the learner to view both what the native speaker is saying(and native speakers tend to speak *fast*), as well as the translated text to the user's native language, providing maximum learning efficiency. The build instructions are below, and I hope them to be as simple as possible. 
+This project was designed to help other language learners enjoy movies in their target language while boosting their comprehension skills. It allows the learner to view both what the native speaker is saying(and native speakers tend to speak *fast*), as well as the translated text to the user's native language, providing maximum learning efficiency. 
 
+<br>
 
-## **GETTING STARTED**
-
-First off, we need to actually install the project files. To do this, change directory to the location you want to install the files to and run:
-
-  - ```git clone https://github.com/Gavin8233/MovieTranslatorApp```
-
-Or alternatively, you can install the zip file from GitHub and extract the folder to your desired destination. 
+## **Building MovieTranslatorApp**
 
 ### **LibreTranslate**
 
-LibreTranslate is a language translation API that allows self hosting, in order for this project to run, LibreTranslate is required. Visit their repository at https://github.com/LibreTranslate/LibreTranslate and follow the quickstart guide in the README to self host LibreTranslate, and then proceed to the next step. 
+LibreTranslate is a language translation API that allows self hosting, in order for MovieTranslatorApp to run, LibreTranslate is required. Visit their repository at https://github.com/LibreTranslate/LibreTranslate and follow the quickstart guide in the README to self host LibreTranslate. 
 
-### **FFmpeg**
+### **IMPORTANT:**
+  - **The first part of the build process is separated by OS**, ensure you are following the steps for your specific OS.
+  - If you run into any issues during the build process, scroll to the **Troubleshooting** header.
+  - Ensure you read the **Additional Notes** header or you might run into strange issues when running the program. 
+  - Read the **Additional Arguments** header for important details on the features MovieTranslatorApp provides.
 
-FFmpeg is not automatically configured with CMake, so it must be manually installed. If you are on Linux or Mac, use your system's package manager and install FFmpeg. If you are on Windows,
-you **MUST** install FFmpeg through one of their official releases and not a package manager, the instructions for each system are below:
+The instructions will start with Linux, followed by Windows, and then MacOS. The build process will conclude with general instructions for each system, found under the **General Instructions** header. 
 
-  - Windows:
-    - Go to https://github.com/BtbN/FFmpeg-Builds/releases
-    - Install '**ffmpeg-master-latest-win64-gpl-shared.zip**'
-    - Make a folder in your C drive titled '**ffmpeg**'
-    - Extract the contents of the newly downloaded folder into the ffmpeg folder. 
-    - **You should have C:/ffmpeg/include, ensure it is not C:/ffmpeg/\<downloaded_folder\>/include.**
+### Linux
 
-  - Linux: ```sudo apt install libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev```
+**Open a new terminal, and then run this command:**
+  - ```<your package manager> install libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev```
 
-  - Mac: ```brew install ffmpeg```
+**If this fails or says packages not found, then run:**
+  - ```<your package manager> install ffmpeg```
 
-**(any package manager can be used, these are just examples for the most common)**
+This is required because some Linux distributions require directly installing FFmpeg libraries (libavcodec, libavutil) and others install these libraries with the general FFmpeg install. 
 
-### **OpenAL**
+Now, **you need to ensure** that you have a compatible audio device which OpenAL can find. (PulseAudio, ALSA, or PipeWire) Others may work, but these are the ones I am aware of and tested. **If you do not have a compatible audio device, OpenAL will fail to find your default audio device and a full project redownload will be required.**
 
-**If you are on Windows or Mac, you can skip to the Build header.**
+**Run the following command:**
+  - ```<your package manager> install libopenal-dev```
 
- OpenAL is an audio playback library for c++. In order for it work on Linux, you need to ensure the following. 
+**If this fails or says packages not found, OpenAL Soft is automatically downloaded later in the build process.** This command is required to try because on some distributions OpenAL Soft alone will not work. (I am not quite sure why.)
 
-  - You have a compatible audio playback driver (PulseAudio, ALSA, or PipeWire).
-    - **If you do not**, run ```<your package manager> install libpulse-dev libasound2-dev```
+**Ensure that all steps are completed**, then proceed to the **General Instructions** header to complete the build process.
 
-  - You have OpenAL installed.
-    - **If you do not**, run ```<your package manager> install libopenal-dev```.
+<br>
 
-**Make sure you have a compatible audio playback driver** or you will have to delete and reinstall all project files for OpenAL to properly find your audio device. 
+### Windows
 
-### **Build**
+Since FFmpeg is not automatically configured with CMake, it must be manually installed through one of FFmpeg's official releases and placed in the location MovieTranslatorApp expects. 
 
-After all these steps are complete, read back through and assure you completed **everything**.
+  - Go to https://github.com/BtbN/FFmpeg-Builds/releases and install '**ffmpeg-master-latest-win64-gpl-shared.zip**'
+  - Make a folder in your C drive titled '**ffmpeg**'
+  - Extract the contents of the newly downloaded folder into the ffmpeg folder. 
 
-Then, change directory into the **MovieTranslatorApp** folder and run the following commands:
+**You should have C:/ffmpeg/include, ensure it is not C:/ffmpeg/\<downloaded_folder\>/include** or FFmpeg will fail to be found when running MovieTranslatorApp.
+
+After this is complete, you can proceed to the **General Instructions** header.
+
+<br>
+
+### MacOS
+
+Simply open a new terminal and run ```<your package manager> install ffmpeg```. After this is done, proceed to the **General Instructions** header. 
+
+<br>
+
+## General Instructions
+
+**Ensure you completed the OS specific steps before running these commands.** 
+
+Change directory to the location you want to install the MovieTranslatorApp folder to, and run:
+
+  - ```git clone https://github.com/Gavin8233/MovieTranslatorApp```
+
+Or alternatively, you can install the zip file from GitHub and extract the folder to your desired location.
+
+**Now, change directory into the installed MovieTranslatorApp folder and run the following commands:**
+
   - ```mkdir build```
   - ```cd build```
   - ```cmake ..```
-  - ```cmake --build .```. If you want this to run faster, add ```--parallel <job amount>``` to the end. 
-  - ```cmake --install .```
+  - ```cmake --build . --config Release```
 
-The final command will install the necessary resources and the /bin folder to a default location depending on your system. 
-You can find the files at the following locations:
+**This final command requires admin**, if you are on Linux or Mac run it with ```sudo``` pre-fixed. If you are on Windows, open an admin command prompt and change directory to the build folder. **Run this command:**
 
-  - #### Windows
-    - **C:/Program Files/MovieTranslatorApp/bin/** and **C:/Program Files/MovieTranslatorApp/share/MovieTranslatorApp/**
+  - ```cmake --install . --config Release```
 
-  - #### Linux
-    - **/usr/local/bin/** and **/usr/local/share/MovieTranslatorApp/**
+<br>
 
-  - #### Mac
-    - **/usr/local/MovieTranslatorApp.app/**
+### Start the app
 
-## Run the App
+To start the application, assure that LibreTranslate is running on localhost:5000 (**This can be overridden with an argument**) before running the executable.
 
-To run the application you need to pass in 2 arguments. 
+To run the executable you need to pass in 2 arguments. 
   - The path to your movie file
   - The path to your SRT file
 
@@ -132,19 +121,50 @@ To run the application you need to pass in 2 arguments.
 And **not** this:
   - ```./MovieTranslatorApp -path/to/video --path/to/srtfile```
 
-You also need to assure that LibreTranslate is running on localhost:5000(**this can be overridden with an argument**) before running the executable.
+<br>
+
+### Additional Notes
+
+Depending on the language you are attempting to display, some font files will not support it. If you need to provide your own font file that works for your language read the **Additional Arguments** header and look for the ```fontfile``` argument. 
+
+If your video is high quality and the video is not decoding fast enough (It will be in slow motion), read the **Additional Arguments** header and look for the ```-hpTrue <threads>``` argument and pass this argument into MovieTranslatorApp. 
+
+If you are on Linux or Mac and the SRT file you install uses Windows line endings, you need to install dos2unix or another similar tool and run ```dos2unix subtitles.srt```. If you are not sure what line endings are used run MovieTranslatorApp and it will throw an exception and an error message telling you that the SRT file needs to be converted. 
+
+
+#### **You can find the executable at the following locations:**
+
+|     OS       | Path                                                                                |
+| :--------:   | :---------------------------------------------------------------------------------- |
+| **Windows**  | **C:/Program Files/MovieTranslatorApp/bin/MovieTranslatorApp**                      |
+| **Linux**    | **/usr/local/MovieTranslatorApp**                                                   |
+| **MacOS**    | **/usr/local/MovieTranslatorApp.app/Contents/MacOS/MovieTranslatorApp**             |
+
+#### **And the resources and shaders folder at the following locations:**
+
+|     OS       | Path                                                                                |
+| :--------:   | :---------------------------------------------------------------------------------- |
+| **Windows**  | **C:/Program Files/MovieTranslatorApp/share/MovieTranslatorApp/**                   |
+| **Linux**    | **/usr/local/share/MovieTranslatorApp/**                                            |
+| **MacOS**    | **/usr/local/MovieTranslatorApp.app/**                                              |
+
+<br>
+
+**Please note that this project is not extensively tested on each machine, and error handling is quite minimal.**
+
+<br>
 
 ### Additional Arguments
 
 You can pass the following additional arguments into Movie Translator.
 
-| Argument   | Description | Default  |
-| :--------: | :-------------: | :--------: |
-| ```-librehost <ip>```  | Overrides the IP HTTPLib Client defaults to        |    **localhost**      |
-| ```-libreport <port>``` | Overrides the port HTTPLib Client defaults to           |   **5000**       |
-| ```-hpTrue```    | Enables multi-threaded video decoding         |    **False**      |
-| ```-printinfo``` | Prints the SRT and video file path you passed in           |   **False**       |
-| ```-fontfile <path/to/.ttf>```    |  Overrides the font file Freetype uses          |  **arial.ttf**        |
+|             Argument                  |                       Description                             |     Default      |
+| :-----------------------------------: | :-----------------------------------------------------------: | :--------------: |
+|       ```-librehost <ip>```           |        Overrides the IP HTTPLib Client defaults to            |   **localhost**  |
+|       ```-libreport <port>```         |        Overrides the port HTTPLib Client defaults to          |   **5000**       |
+|       ```-hpTrue <threads>```         |        Enables multi-threaded video decoding                  |   **False**      |
+|       ```-printinfo```                |        Prints the SRT and video file path you passed in       |   **False**      |
+|       ```-fontfile <path/to/.ttf>```  |        Overrides the font file Freetype uses                  |   **arial.ttf**  |
 
 ### Environment Variables
 
@@ -155,13 +175,7 @@ You can also set the following environment variables if you place your texture l
 
 For Linux and Mac, replace ```set``` with ```export```.
 
-### **FINAL NOTES**
-
-Depending on the language you are attempting to display, some font files will not support it. If you need to provide your own font file that works for your language read the additional arguments header and look for the ```fontfile``` argument. 
-
-Please note that this project is not extensively tested on each machine, and error handling is quite minimal.
-
-<br><br><br>
+<br>
 
 # **TROUBLESHOOTING**
 
