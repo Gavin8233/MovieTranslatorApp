@@ -4,7 +4,7 @@
   - CMake
   - Git (**Optional**)
 
-  To install, proceed to the **Getting Started** header.
+  To install, proceed to the **Building MovieTranslatorApp** header.
 
 # **MOVIE PLAYER**
 
