@@ -28,9 +28,23 @@ static std::string load_file_text_into_string(const std::string path) {
 void Shader::compile(const std::string vertex_path, const std::string fragment_path) {
 
     unsigned int s_vert, s_frag;
+    std::string vertex_code, fragment_code;
 
-    std::string vertex_code = load_file_text_into_string(vertex_path);
-    std::string fragment_code = load_file_text_into_string(fragment_path);
+    try {
+
+        vertex_code = load_file_text_into_string(vertex_path);
+        fragment_code = load_file_text_into_string(fragment_path);
+
+    }
+    catch (std::exception& e) {
+
+        std::cerr << e.what() << "."
+        "\nDid you run cmake --install .?"
+        "\nPath=" << vertex_path << ""
+        "\nDoes this exist? If not, copy the textures file from the GitHub repository and place it in the correct location."
+        "\nDisplay will not work properly." << std::endl;
+
+    }
 
     const char* vertex_source = vertex_code.c_str();
     const char* fragment_source = fragment_code.c_str();

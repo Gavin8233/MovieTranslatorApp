@@ -23,7 +23,7 @@ pen_y { 0 }
         "\nThis is likely due to a misconfigured ttf file. Try installing a different one and use that."
         "\nIf this message keeps appearing, let the application use the default font."
         "\nIf the default font works(Even if there are boxes, it is working), then you need to find a compatible ttf file that works with Freetype."
-        "\nIf the default font also fails, try to reinstall and rebuild the project.";
+        "\nIf the default font also fails, try to reinstall and rebuild the project." << std::endl;
         throw std::runtime_error("FAILED TO LOAD FONT");
 
     }
@@ -39,7 +39,7 @@ void textureAtlas::load_character(const uint32_t& codepoint) {
         std::cerr << "\nERROR: Failed to load character."
         "\nThis is likely due to your ttf file not containing the required character."
         "\nEnsure that the ttf file you are using supports the language's characters."
-        "\nYou can use the -fontfile path/to/.ttf command when running the executable to set a custom font file if you are using the default one";
+        "\nYou can use the -fontfile path/to/.ttf command when running the executable to set a custom font file if you are using the default one" << std::endl;
         throw std::runtime_error("FAILED TO LOAD CHARACTER");
 
     }

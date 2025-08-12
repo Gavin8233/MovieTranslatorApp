@@ -217,21 +217,63 @@ namespace GLutil {
 
     void init_overlay_textures() {
 
+        const std::string err_message = "\nDid you run cmake --install .?"
+        "\nPath=" << GET_RESOURCE_FOLDER_PATH() + "textures/"
+        "\nVerify that this path exists."
+        "\nIn this folder you should have:\nbar.png\nsettings_wheel.png\nsettingsmenu.png\nlanguageselect.png"
+        "\nIf you do not, redownload the textures from the GitHub repository and place them in the expected path." << std::endl;
+
         unsigned int progress_bar_texture_id;
         glActiveTexture(GL_TEXTURE0 + CONSTANTS::TEXTURES::PROGRESS_BAR_TEXTURE);
-        progress_bar_texture_id = load_texture(GET_RESOURCE_FOLDER_PATH() + "textures/bar.png");
+        try {
+
+            progress_bar_texture_id = load_texture(GET_RESOURCE_FOLDER_PATH() + "textures/bar.png");
+
+        }
+        catch (std::exception& e) {
+
+            std::cerr << e.what() << err_message << std::endl;
+
+        }
 
         unsigned int settings_wheel_texture_id;
         glActiveTexture(GL_TEXTURE0 + CONSTANTS::TEXTURES::SETTINGS_WHEEL_TEXTURE);
-        settings_wheel_texture_id = load_texture(GET_RESOURCE_FOLDER_PATH() + "textures/settings_wheel.png");
+        try {
+
+            settings_wheel_texture_id = load_texture(GET_RESOURCE_FOLDER_PATH() + "textures/settings_wheel.png");
+
+        }
+        catch (std::exception& e) {
+
+            std::cerr << e.what() << err_message << std::endl;
+
+        }
         
         unsigned int settings_menu_texture_id;
         glActiveTexture(GL_TEXTURE0 + CONSTANTS::TEXTURES::SETTINGS_MENU_TEXTURE);
-        settings_menu_texture_id = load_texture(GET_RESOURCE_FOLDER_PATH() + "textures/settingsmenu.png");
+        try {
+
+            settings_menu_texture_id = load_texture(GET_RESOURCE_FOLDER_PATH() + "textures/settingsmenu.png");
+
+        }
+        catch (std::exception& e) {
+
+            std::cerr << e.what() << err_message << std::endl;
+
+        }
 
         unsigned int language_select_menu_texture_id;
         glActiveTexture(GL_TEXTURE0 + CONSTANTS::TEXTURES::LANGUAGE_SELECT_TEXTURE);
-        language_select_menu_texture_id = load_texture(GET_RESOURCE_FOLDER_PATH() + "textures/languageselect.png");
+        try {
+
+            language_select_menu_texture_id = load_texture(GET_RESOURCE_FOLDER_PATH() + "textures/languageselect.png");
+
+        }
+        catch (std::exception& e) {
+
+            std::cerr << e.what() << err_message << std::endl;
+
+        }
 
         texture_ids[textureName::PROGRESS_BAR] = progress_bar_texture_id;
         texture_ids[textureName::SETTINGS_WHEEL] = settings_wheel_texture_id;

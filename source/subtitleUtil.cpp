@@ -42,7 +42,7 @@ namespace subtitleUtil {
             "\nIf the error persists and you are NOT on Windows, it is possible the SRT file you provided is encoded using windows line endings like ^M. Verify that it is not."
             "\nIf it is, then run '<your package manager> install dos2unix. Then run 'dos2unix <your file name>.srt' and try to run the program again."
             "\nIf all else fails, then try a full reinstall of the program and try running again. Although, it should most likely not be a problem with the code or httplib, "
-            "and more likely to be that something is blocking the requests sent to LibreTranslate.";
+            "and more likely to be that something is blocking the requests sent to LibreTranslate." << std::endl;
             throw std::runtime_error("Failed to get Translation from http://<your ip>:5000/translate");
 
         }
@@ -55,7 +55,7 @@ namespace subtitleUtil {
 
         } catch (std::exception& e) {
 
-            std::cerr << "\nFailed to parse translated return data from LibreTranslate";
+            std::cerr << "Failed to parse translated return data from LibreTranslate" << std::endl;
             return "FAILED TRANSLATION";
 
         }
@@ -225,8 +225,9 @@ namespace subtitleUtil {
                 return languages.at(get_valid_display_index(3));
 
             default: 
-
-                throw std::runtime_error("SOMETHING WENT HORRIBLY WRONG");
+                // this should never happen
+                std::cerr << "Something went wrong" << std::endl;
+                return languages.at(get_valid_display_index(0));
 
         }    
 
@@ -255,8 +256,9 @@ namespace subtitleUtil {
                 return GET_LANGUAGE_ENUM_AS_STRING(languages.at(get_valid_display_index(3)));
 
             default: 
-
-                throw std::runtime_error("SOMETHING WENT HORRIBLY WRONG");
+                // this should never happen
+                std::cerr << "Something went wrong" << std::endl;
+                return GET_LANGUAGE_ENUM_AS_STRING(languages.at(get_valid_display_index(0)));
 
         }    
 

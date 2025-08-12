@@ -104,6 +104,8 @@ namespace Utility {
 
             else {
 
+                std::cerr << "\nFailed to grab codepoints from a text string."
+                "\nThis shouldn't happen, verify that the SRT file you gave has valid UTF-8 text." << std::endl;
                 throw std::runtime_error("SOMETHING WENT WRONG WHEN GETTING CODEPOINTS FROM STRING");
 
             }

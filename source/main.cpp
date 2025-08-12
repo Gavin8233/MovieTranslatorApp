@@ -8,7 +8,17 @@ int main(int argc, char* argv[]) {
 
     userPreferences::init_default_user_preferences();
 
-    GLutil::init_opengl_context();
+    try {
+
+        GLutil::init_opengl_context();
+
+    }
+    catch (std::exception& e) {
+
+        std::cerr << e.what() << std::endl;
+
+    }
+    
     GLutil::init_texture_atlas();
     GLutil::init_overlay_textures();
 
@@ -21,7 +31,7 @@ int main(int argc, char* argv[]) {
     } 
     catch (std::exception& e) {
 
-        std::cerr << "\n" << e.what();
+        std::cerr << e.what() << std::endl;
 
         return -1; // handle args failed
 

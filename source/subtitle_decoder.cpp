@@ -59,17 +59,36 @@ void subtitleDecoder::decode_loop() {
 
         std::getline(file, line); // Subtitle text 
 
-        if (line.empty()) throw std::runtime_error("SRT FILE IS INVALID");
+        if (line.empty()) continue; 
 
         subtitle_text = line;
 
         // Refer to subtitleUtil to see what function does in depth
         if (!subtitleUtil::decode_subtitle_text(file, subtitle_text, line)) { // File ended
 
-            translated_text = subtitleUtil::translate_text(subtitle_text);
+            try {
 
-            text_codepoints = Utility::get_codepoints_from_string(subtitle_text);
-            translated_text_codepoints = Utility::get_codepoints_from_string(translated_text);
+                translated_text = subtitleUtil::translate_text(subtitle_text);
+
+            }
+            catch(std::exception& e) {
+
+                std::cerr << e.what() << std::endl;
+                translated_text = "failed";
+
+            }
+
+            try {
+
+                text_codepoints = Utility::get_codepoints_from_string(subtitle_text);
+                translated_text_codepoints = Utility::get_codepoints_from_string(translated_text);
+
+            }
+            catch (std:exception& e) {
+
+                std::cerr << e.what() << std::endl;
+
+            }
 
             Subtitle final_sub = subtitleUtil::make_subtitle(timestamp, subtitle_text, translated_text, text_codepoints, translated_text_codepoints);
 
@@ -81,10 +100,29 @@ void subtitleDecoder::decode_loop() {
 
         }
 
-        translated_text = subtitleUtil::translate_text(subtitle_text);
+        try {
 
-        text_codepoints = Utility::get_codepoints_from_string(subtitle_text);
-        translated_text_codepoints = Utility::get_codepoints_from_string(translated_text);
+            translated_text = subtitleUtil::translate_text(subtitle_text);
+
+        }
+        catch (std::exception& e) {
+
+            std::cerr << e.what() << std::endl;
+            translated_text = "failed";
+
+        }
+
+        try {
+
+            text_codepoints = Utility::get_codepoints_from_string(subtitle_text);
+            translated_text_codepoints = Utility::get_codepoints_from_string(translated_text);
+
+        }
+        catch (std:exception& e) {
+
+            std::cerr << e.what() << std::endl;
+
+        }
 
         Subtitle sub = subtitleUtil::make_subtitle(timestamp, subtitle_text, translated_text, text_codepoints, translated_text_codepoints);
 

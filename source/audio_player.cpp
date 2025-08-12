@@ -47,7 +47,7 @@ alc_context { nullptr }
         "\n2.) Uninstall the folder where you originally copied the project."
         "\n3.) run '<your package manager> install libpulse-dev libasound2-dev'"
         "\nAfter all this is complete, you can re-clone the repository and run the build commands, then you shouldn't see this error again on startup."
-        "\nIf you do see this error again, check your system's audio configuration to ensure audio output devices are available(PulseAudio, ALSA, or PipeWire).";
+        "\nIf you do see this error again, check your system's audio configuration to ensure audio output devices are available(PulseAudio, ALSA, or PipeWire)." << std::endl;
         throw std::runtime_error("Failed to Create an OpenAL Device");
 
     }

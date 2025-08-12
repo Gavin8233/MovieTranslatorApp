@@ -18,16 +18,16 @@ int videoPlayer::last_windowed_mode_height = 0;
 
 videoPlayer::~videoPlayer() {
 
-    std::cout << "\nDestroying subtitle decoder thread.";
+    std::cout << "Destroying subtitle decoder thread." << std::endl;
     delete subtitle_decoder;
     delete renderer;
-    std::cout << "\nDestroying audio player thread.";
+    std::cout << "Destroying audio player thread." << std::endl;
     delete audio_player;
-    std::cout << "\nDestroying video decoder thread.";
+    std::cout << "Destroying video decoder thread." << std::endl;
     delete video_decoder;
-    std::cout << "\nDestroying GL resources.";
+    std::cout << "Destroying GL resources.";
     GLutil::destroy_gl_context();
-    std::cout << "\nComplete.";
+    std::cout << "Complete." << std::endl;
 
 }
 
@@ -49,14 +49,50 @@ space_was_clicked { false }
 
 {
 
-    renderer = new Renderer(font_file_path);
+    try {
+
+        renderer = new Renderer(font_file_path);
+
+    }
+    catch (std::exception& e) {
+
+        std::cerr << e.what() << "\nFailed to init renderer, try checking your font file path." << std::endl;
+
+    }
+
     renderer->init_shaders();
 
-    video_decoder = new videoDecoder(video_file_path, threads);
+    try {
+
+        video_decoder = new videoDecoder(video_file_path, threads);
+
+    }
+    catch (std::exception& e) {
+
+        std::cerr << e.what() << ""
+        "\nEnsure that the video you provided is a valid video file which FFmpeg can decode."
+        "\nEnsure that the argument for the video file paths do not look like --path or -path."
+        "\nTry running the program with './MovieTranslatorApp filepath1 filepath2 printinfo'"
+        "\nThis will print the file paths you pass in."
+        "\nIf this looks correct and the video file is valid, then this should not happen, verify your FFmpeg install." << std::endl;
+        
+    }
+
     video_duration = video_decoder->get_video_length();
 
     subtitle_decoder = new subtitleDecoder(subtitle_srt_path);
-    audio_player = new audioPlayer;
+
+    try {
+
+        audio_player = new audioPlayer;
+
+    }
+    catch (std::exception& e) {
+
+        std::cerr << e.what() << ""
+        "\nAudio disabled." << std::endl;
+
+    }
 
     subtitle_decoder->start_decoder_thread();
 

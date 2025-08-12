@@ -68,13 +68,6 @@ audio_stream { -1 }
 
 {
 
-    // in case of exception
-    std::string error_str = "\nEnsure that the video you provided is a valid video file which FFmpeg can decode."
-    "\nEnsure that the argument for the video file paths do not look like --path or -path."
-    "\nTry running the program with './MovieTranslatorApp filepath1 filepath2 printinfo'"
-    "\nThis will print the file paths you pass in."
-    "\nIf this looks correct and the mp4 file is valid, then try reinstalling FFmpeg and re-run the program.";
-
     AVCodecContext* video_codec_context = nullptr;
     AVCodecContext* audio_codec_context = nullptr;
     AVCodecParameters* video_codec_params = nullptr;
@@ -84,14 +77,12 @@ audio_stream { -1 }
 
     if (avformat_open_input(&format_context, video_file_path.c_str(), nullptr, nullptr) != 0) {
 
-        std::cerr << "\nERROR: Failed to open the video file path." << error_str;
         throw std::runtime_error("Failed to open video file");
 
     }
 
     if (avformat_find_stream_info(format_context, nullptr) < 0) {
 
-        std::cerr << "\nERROR: Failed to find stream info for video file." << error_str;
         throw std::runtime_error("Failed to find video stream info");
 
     }
@@ -116,14 +107,12 @@ audio_stream { -1 }
 
     if (video_stream == -1) {
 
-        std::cerr << "\nERROR: Failed to find the video stream for the video file." << error_str;
         throw std::runtime_error("Failed to find video stream");
 
     }
 
     if (audio_stream == -1) {
 
-        std::cerr << "\nERROR: Failed to find audio stream for the video file." << error_str;
         throw std::runtime_error("Failed to find audio stream");
 
     }
@@ -135,7 +124,6 @@ audio_stream { -1 }
 
     if (!video_codec) {
     
-        std::cerr << "\nERROR: Failed to find video codec." << error_str;
         throw std::runtime_error("Failed to find video codec");
 
     }
@@ -151,14 +139,12 @@ audio_stream { -1 }
 
     if (avcodec_parameters_to_context(video_codec_context, video_codec_params) < 0) {
 
-        std::cerr << "\nERROR: Failed to copy video codec params to context." << error_str;
         throw std::runtime_error("Failed to copy video codec params to context");
 
     }
 
     if (avcodec_open2(video_codec_context, video_codec, nullptr) != 0) {
 
-        std::cerr << "\nERROR: Failed to open video codec." << error_str;
         throw std::runtime_error("Failed to open video codec");
 
     }
@@ -170,7 +156,6 @@ audio_stream { -1 }
 
     if (!audio_codec) {
 
-        std::cerr << "\nERROR: Failed to find audio codec." << error_str;
         throw std::runtime_error("Failed to find audio codec");
 
     }
@@ -179,14 +164,12 @@ audio_stream { -1 }
 
     if (avcodec_parameters_to_context(audio_codec_context, audio_codec_params)) {
 
-        std::cerr << "\nERROR: Failed to copy audio codec params to context." << error_str;
         throw std::runtime_error("Failed to copy audio codec params to context");
 
     }
 
     if (avcodec_open2(audio_codec_context, audio_codec, nullptr) != 0) {
 
-        std::cerr << "\nERROR: Failed to open audio codec." << error_str;
         throw std::runtime_error("Failed to open audio codec");
 
     }
@@ -205,7 +188,6 @@ audio_stream { -1 }
 
     if (frame_rgb == NULL || video_frame == NULL || audio_frame == NULL) {
 
-        std::cerr << "\nFailed to allocate video frames." << error_str;
         throw std::runtime_error("Failed to allocate frames");
 
     }
@@ -245,7 +227,6 @@ audio_stream { -1 }
 
         av_channel_layout_uninit(&layout);
 
-        std::cerr << "\nERROR: Failed to init SWR context." << error_str;
         throw std::runtime_error("Failed to initialize swr context");
 
     }
@@ -544,11 +525,29 @@ void videoDecoder::seek_video(int64_t& seek_target_seconds) {
 
     scaled_timestamp = av_rescale_q(seek_target_seconds * AV_TIME_BASE, AV_TIME_BASE_Q, format_context->streams[video_stream]->time_base);
     flag = (scaled_timestamp < 0) ? AVSEEK_FLAG_BACKWARD : 0;
-    seek_t(scaled_timestamp, video_context.codec_context, video_stream, flag);
+    try {
+
+        seek_t(scaled_timestamp, video_context.codec_context, video_stream, flag);
+
+    }
+    catch (std::exception& e) {
+
+        std::cerr << e.what() << "\nVideo might be out of sync" << std::endl;
+
+    }
 
     scaled_timestamp = av_rescale_q(seek_target_seconds * AV_TIME_BASE, AV_TIME_BASE_Q, format_context->streams[audio_stream]->time_base);
     flag = (scaled_timestamp < 0) ? AVSEEK_FLAG_BACKWARD : 0;
-    seek_t(scaled_timestamp, audio_context.codec_context, audio_stream, flag);
+    try {
+
+        seek_t(scaled_timestamp, audio_context.codec_context, audio_stream, flag);
+
+    }
+    catch (std::exception& e) {
+
+        std::cerr << e.what() << "\nAudio might be out of sync" << std::endl;
+
+    }
 
 }
 
