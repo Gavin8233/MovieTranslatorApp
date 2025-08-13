@@ -137,7 +137,7 @@ If you are on Linux or Mac and the SRT file you install uses Windows line ending
 |     OS       | Path                                                                                |
 | :--------:   | :---------------------------------------------------------------------------------- |
 | **Windows**  | **C:/Program Files/MovieTranslatorApp/bin/MovieTranslatorApp**                      |
-| **Linux**    | **/usr/local/MovieTranslatorApp**                                                   |
+| **Linux**    | **/usr/local/bin/MovieTranslatorApp**                                                   |
 | **MacOS**    | **/usr/local/MovieTranslatorApp.app/Contents/MacOS/MovieTranslatorApp**             |
 
 #### **And the resources and shaders folder at the following locations:**
