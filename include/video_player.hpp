@@ -89,8 +89,6 @@ class videoPlayer {
         
         void process_input(GLFWwindow* window);
 
-        void if_paused();
-
         void sync_audio();
         void sync_video();
 

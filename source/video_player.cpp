@@ -18,14 +18,14 @@ int videoPlayer::last_windowed_mode_height = 0;
 
 videoPlayer::~videoPlayer() {
 
-    std::cout << "Destroying subtitle decoder thread." << std::endl;
+    std::cout << "\nDestroying subtitle decoder thread." << std::endl;
     delete subtitle_decoder;
     delete renderer;
     std::cout << "Destroying audio player thread." << std::endl;
     delete audio_player;
     std::cout << "Destroying video decoder thread." << std::endl;
     delete video_decoder;
-    std::cout << "Destroying GL resources.";
+    std::cout << "Destroying GL resources." << std::endl;
     GLutil::destroy_gl_context();
     std::cout << "Complete." << std::endl;
 
@@ -105,20 +105,6 @@ space_was_clicked { false }
     current_data.video_data = video_decoder->get_next_video_data();
 
     audio_player->startup_thread();
-
-}
-
-void videoPlayer::if_paused() {
-
-    /* 
-    
-        I don't know why or how but this code is holding together the entire pausing system
-    
-    */
-
-    process_input(GLutil::window);
-
-    glfwSwapBuffers(GLutil::window);
 
 }
 
@@ -441,17 +427,12 @@ void videoPlayer::start() {
         }
 
 
-        if (GLOBAL_STATES::VIDEO_PAUSED) {
+        if (!GLOBAL_STATES::VIDEO_PAUSED) {
 
-            if_paused();
-
-            continue;
+            sync_video();
+            sync_audio(); 
 
         }
-
-        sync_video();
-        sync_audio(); 
-
 
         process_input(GLutil::window);
 
