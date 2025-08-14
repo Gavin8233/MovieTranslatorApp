@@ -98,12 +98,12 @@ Or alternatively, you can install the zip file from GitHub and extract the folde
 
   - ```mkdir build```
   - ```cd build```
-  - ```cmake ..```
+  - ```cmake .. -DCMAKE_BUILD_TYPE=Release```
   - ```cmake --build . --config Release```
 
 **This final command requires admin**, if you are on Linux or Mac run it with ```sudo``` pre-fixed. If you are on Windows, open an admin command prompt and change directory to the build folder. **Run this command:**
 
-  - ```cmake --install . --config Release```
+  - ```cmake --install .```
 
 <br>
 
@@ -148,7 +148,7 @@ If you are on Linux or Mac and the SRT file you install uses Windows line ending
 | :--------:   | :---------------------------------------------------------------------------------- |
 | **Windows**  | **C:/Program Files/MovieTranslatorApp/share/MovieTranslatorApp/**                   |
 | **Linux**    | **/usr/local/share/MovieTranslatorApp/**                                            |
-| **MacOS**    | **/usr/local/MovieTranslatorApp.app/**                                              |
+| **MacOS**    | **/usr/local/MovieTranslatorApp.app/Contents/**                                              |
 
 <br>
 

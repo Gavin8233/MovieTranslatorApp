@@ -201,12 +201,12 @@ if (WIN32)
     )
   endforeach()
 
-  install(DIRECTORY "${CMAKE_BINARY_DIR}/_deps/openal-build/Debug/"
+  install(DIRECTORY "${CMAKE_BINARY_DIR}/_deps/openal-build/Release/"
     DESTINATION bin
     FILES_MATCHING PATTERN "*.dll"
   )
 
-  install(DIRECTORY "${CMAKE_BINARY_DIR}/_deps/freetype-build/Debug"
+  install(DIRECTORY "${CMAKE_BINARY_DIR}/_deps/freetype-build/Release"
     DESTINATION bin
     FILES_MATCHING PATTERN "*.dll"
   )
