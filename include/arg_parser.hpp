@@ -75,6 +75,7 @@ struct Vars {
     std::string ip;
     int port;
     int threads;
+    std::string translate_to_override;
 
 };
 
@@ -90,6 +91,7 @@ public:
         vars.ip = "localhost";
         vars.port = 5000;
         vars.threads = 1;
+        vars.translate_to_override = "false";
 
     }
 
@@ -100,11 +102,12 @@ public:
             std::cerr << "Make sure you provide the video file path and srt file path"
             "\nCorrect Usage: " << argv[0] << " <video_file_path> <subtitle_file_path> [options]";
             std::cerr << "\nOptions:"
-            "\n     -hpTrue <thread_count>      Enables multi-threaded video decoding"
-            "\n     -printinfo                  Prints the file paths you passed in"
-            "\n     -librehost <ip>             Sets LibreTranslate host"
-            "\n     -libreport <port>           Sets LibreTranslate port"
-            "\n     -fontfile <file_path>       Sets the path to the .ttf file that Freetype will use";
+            "\n     -hpTrue <thread_count>                  Enables multi-threaded video decoding"
+            "\n     -printinfo                              Prints the file paths you passed in"
+            "\n     -librehost <ip>                         Sets LibreTranslate host"
+            "\n     -libreport <port>                       Sets LibreTranslate port"
+            "\n     -fontfile <file_path>                   Sets the path to the .ttf file that Freetype will use"
+            "\n     -translateTo <2 letter character code>  Overrides the languages that are included in MovieTranslatorApp with your own target language" << std::endl;
 
             std::this_thread::sleep_for(std::chrono::seconds(3)); // let user see the message in case window wants to close immediately if not ran from terminal
 
@@ -186,6 +189,18 @@ public:
                 std::cout << "Setting Font File Path to: " << vars.font_file_path << std::endl;
 
             } 
+
+            else if (arg == "-translateTo") {
+
+                if (!handle_str(argc, argv, vars.translate_to_override, i, arg)) {
+
+                    throw std::runtime_error(fail_message);
+
+                }
+
+                std::cout << "\nTranslating to: " << vars.translate_to_override << std::endl;
+
+            }
         
             else {
 

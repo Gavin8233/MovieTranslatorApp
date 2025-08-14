@@ -160,13 +160,14 @@ If you are on Linux or Mac and the SRT file you install uses Windows line ending
 
 You can pass the following additional arguments into Movie Translator.
 
-|             Argument                  |                       Description                             |     Default      |
-| :-----------------------------------: | :-----------------------------------------------------------: | :--------------: |
-|       ```-librehost <ip>```           |        Overrides the IP HTTPLib Client defaults to            |   **localhost**  |
-|       ```-libreport <port>```         |        Overrides the port HTTPLib Client defaults to          |   **5000**       |
-|       ```-hpTrue <threads>```         |        Enables multi-threaded video decoding                  |   **False**      |
-|       ```-printinfo```                |        Prints the SRT and video file path you passed in       |   **False**      |
-|       ```-fontfile <path/to/.ttf>```  |        Overrides the font file Freetype uses                  |   **arial.ttf**  |
+|                         Argument                          |                                             Description                                                 |      Default      |
+| :-------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------: | :---------------: |
+|                  ```-librehost <ip>```                    |                         Overrides the IP HTTPLib Client defaults to                                     |   **localhost**   |
+|                  ```-libreport <port>```                  |                         Overrides the port HTTPLib Client defaults to                                   |   **5000**        |
+|                  ```-hpTrue <threads>```                  |                         Enables multi-threaded video decoding                                           |   **False**       |
+|                  ```-printinfo```                         |                         Prints the SRT and video file path you passed in                                |   **False**       |
+|                 ```-fontfile <path/to/.ttf>```            |                         Overrides the font file Freetype uses                                           |   **arial.ttf**   |
+|       ```-translateTo <LibeTranslate character code>```   | Overrides the language LibreTranslate translates to (ONCE CHANGED AFTER SET HERE, IT CANNOT BE UNDONE)  |   **English**     |
 
 ### Environment Variables
 

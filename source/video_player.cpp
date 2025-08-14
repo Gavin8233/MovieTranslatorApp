@@ -187,6 +187,8 @@ void videoPlayer::start() {
 
     glfwSwapInterval(1);
 
+    
+
     while (!glfwWindowShouldClose(GLutil::window)) {
 
         glfwPollEvents();

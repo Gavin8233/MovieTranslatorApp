@@ -37,6 +37,12 @@ int main(int argc, char* argv[]) {
 
     }
 
+    if (arg_handler.vars.translate_to_override != "false") {
+
+        userPreferences::alter_translate_to(arg_handler.vars.translate_to_override);
+
+    }
+
     subtitleUtil::init_httplib_client(arg_handler.vars.ip, arg_handler.vars.port);
 
     videoPlayer player(arg_handler.vars.video_file_path, arg_handler.vars.srt_file_path, arg_handler.vars.font_file_path, arg_handler.vars.threads);
