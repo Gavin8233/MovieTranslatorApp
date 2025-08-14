@@ -125,6 +125,8 @@ And **not** this:
 
 ### Additional Notes
 
+You can enter fullscreen mode by clicking 'F' and exit it by clicking 'F' again. 
+
 Depending on the language you are attempting to display, some font files will not support it. If you need to provide your own font file that works for your language read the **Additional Arguments** header and look for the ```fontfile``` argument. 
 
 If your video is high quality and the video is not decoding fast enough (It will be in slow motion), read the **Additional Arguments** header and look for the ```-hpTrue <threads>``` argument and pass this argument into MovieTranslatorApp. 
