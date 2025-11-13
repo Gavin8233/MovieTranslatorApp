@@ -2,10 +2,10 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "include/texture_atlas.hpp"
-#include "include/utility.hpp"
-#include "include/shader.hpp"
-#include "include/GLutil.hpp"
+#include "include/GL/texture_atlas.hpp"
+#include "include/utility/utility.hpp"
+#include "include/GL/shader.hpp"
+#include "include/utility/GLutil.hpp"
 
 class Renderer {
 
@@ -14,10 +14,10 @@ class Renderer {
         Renderer(const std::string& font_path);
         ~Renderer();
 
+        void init_shaders();
+
         void update_video_progress(const int64_t& video_duration, const int64_t& elapsed);
         void set_font_projection(const float& screen_width, const float& screen_height);
-
-        void init_shaders();
 
         void draw_movie();
         void draw_loading_bar();

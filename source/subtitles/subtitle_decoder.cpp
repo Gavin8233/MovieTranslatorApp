@@ -1,5 +1,5 @@
 
-#include "include/subtitle_decoder.hpp"
+#include "include/subtitles/subtitle_decoder.hpp"
 
 subtitleDecoder::~subtitleDecoder() {
 

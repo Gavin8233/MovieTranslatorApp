@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS // shut up msvc
 
-#include "include/video_player.hpp"
+#include "include/video_player/video_player.hpp"
 #include "include/arg_parser.hpp"
 
 

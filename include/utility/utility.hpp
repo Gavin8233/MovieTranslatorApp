@@ -44,8 +44,8 @@ if (shader_env) {
 #include <iomanip>
 
 #include "include/variables.hpp"
-#include "include/subtitleUtil.hpp"
-#include "include/thread.hpp"
+#include "include/utility/subtitleUtil.hpp"
+#include "include/utility/thread.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -59,6 +59,13 @@ namespace Utility {
     uint32_t get_codepoint(unsigned char& byte1, unsigned char& byte2);
     uint32_t get_codepoint(unsigned char& byte1, unsigned char& byte2, unsigned char& byte3);
     uint32_t get_codepoint(unsigned char& byte1, unsigned char& byte2, unsigned char& byte3, unsigned char& byte4);
+
+
+    const std::string GET_LANGUAGE_CHARACTER_CODE(const Language& language);
+    const std::string GET_COLOR_ENUM_AS_STRING(const Color& color);
+    const glm::vec3 GET_FONT_COLOR(const Color& color);
+    const glm::vec2 GET_SUBTITLE_LOCATION(const subtitleLocation& location, const float& screen_width, const float& screen_height);
+    const std::string GET_SUBTITLE_LOCATION_ENUM_AS_STRING(const subtitleLocation& location);
 
 }
 

@@ -1,5 +1,5 @@
 
-#include "include/shader.hpp"
+#include "include/GL/shader.hpp"
 
 static std::string load_file_text_into_string(const std::string path) {
 

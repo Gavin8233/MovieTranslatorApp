@@ -133,19 +133,19 @@ endif()
 add_executable(   
   MovieTranslatorApp
   source/main.cpp
-  source/utility.cpp
-  source/shader.cpp
-  source/video_decoder.cpp
-  source/subtitle_decoder.cpp
-  source/audio_player.cpp
-  source/renderer.cpp
-  source/video_player.cpp
-  source/texture_atlas.cpp
-  source/button.cpp
-  source/GLutil.cpp
-  source/preferences.cpp
+  source/utility/utility.cpp
+  source/GL/shader.cpp
+  source/video_player/video_decoder.cpp
+  source/subtitles/subtitle_decoder.cpp
+  source/audio/audio_player.cpp
+  source/GL/renderer.cpp
+  source/video_player/video_player.cpp
+  source/GL/texture_atlas.cpp
+  source/GL/button.cpp
+  source/utility/GLutil.cpp
+  source/user/preferences.cpp
   source/variables.cpp
-  source/subtitleUtil.cpp
+  source/utility/subtitleUtil.cpp
   ${glad_SOURCE_DIR}/src/glad.c
 )
 

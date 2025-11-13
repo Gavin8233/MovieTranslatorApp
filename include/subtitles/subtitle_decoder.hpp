@@ -2,9 +2,9 @@
 #ifndef SUBTITLEDECODER_H
 #define SUBTITLEDECODER_H
 
-#include "include/decoder.hpp"
-#include "include/utility.hpp"
-#include "include/texture_atlas.hpp"
+#include "include/video_player/decoder.hpp"
+#include "include/utility/utility.hpp"
+#include "include/GL/texture_atlas.hpp"
 
 class subtitleDecoder {
 

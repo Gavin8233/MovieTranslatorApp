@@ -1,12 +1,11 @@
 
-#include "include/video_player.hpp"
+#include "include/video_player/video_player.hpp"
+
+std::vector<Request> videoPlayer::request_queue;
+Display videoPlayer::display;
 
 bool videoPlayer::SETTINGS_OPEN = false;
 bool videoPlayer::LANGUAGE_ALTER_MENU_OPEN = false;
-bool videoPlayer::SUBTITLE_DELAY_ALTERED = false;
-bool videoPlayer::LANGUAGE_CHOICES_ALTERED = false;
-bool videoPlayer::SETTINGS_MENU_ALTERED = false;
-bool videoPlayer::SUBTITLE_LOCATION_ALTERED = false;
 bool videoPlayer::FULLSCREEN_ENABLED = false;
 bool videoPlayer::fullscreen_clicked = false;
 
@@ -97,12 +96,12 @@ space_was_clicked { false }
     subtitle_decoder->start_decoder_thread();
 
     while (!subtitle_decoder->has_subtitle()) { }
-    current_data.subtitle = subtitle_decoder->get_next_subtitle();
+    display.current_data.subtitle = subtitle_decoder->get_next_subtitle();
 
     video_decoder->start_decoder_threads();
 
     while (!video_decoder->has_video_data()) { }
-    current_data.video_data = video_decoder->get_next_video_data();
+    display.current_data.video_data = video_decoder->get_next_video_data();
 
     audio_player->startup_thread();
 
@@ -123,7 +122,7 @@ buttonLocation get_menu_text_location(const buttonName& start, const buttonName&
 
 }
 
-void videoPlayer::set_new_language_display_text() {
+static void set_new_language_display_text(languageChoiceDisplayText& language_choice_display_text) {
 
     std::string choice_one = subtitleUtil::get_language_choice_as_string(1);
     std::string choice_two = subtitleUtil::get_language_choice_as_string(2);
@@ -142,10 +141,10 @@ void videoPlayer::set_new_language_display_text() {
 
 }
 
-void videoPlayer::set_new_menu_display_text() {
+static void set_new_menu_display_text(settingsMenuDisplayText& settings_menu_display_text) {
 
-    std::string current_color = GET_COLOR_ENUM_AS_STRING(userPreferences::user_video_preferences.font_color);
-    std::string current_subtitle_location = GET_SUBTITLE_LOCATION_ENUM_AS_STRING(userPreferences::user_video_preferences.subtitle_location);
+    std::string current_color = Utility::GET_COLOR_ENUM_AS_STRING(userPreferences::user_video_preferences.font_color);
+    std::string current_subtitle_location = Utility::GET_SUBTITLE_LOCATION_ENUM_AS_STRING(userPreferences::user_video_preferences.subtitle_location);
     std::string current_sub_delay = std::to_string(userPreferences::user_video_preferences.subtitle_delay_offset_ms);
     std::string current_sub_scale = std::to_string(userPreferences::user_video_preferences.subtitle_scale);
     
@@ -163,13 +162,28 @@ void videoPlayer::set_new_menu_display_text() {
 
 }
 
+static void set_new_subtitle_delay(Subtitle& sub, const int& delay, subtitleDecoder* sub_decoder) {
+
+    sub.display_timestamp.start = sub.original_timestamp.start + userPreferences::user_video_preferences.subtitle_delay_offset_ms;
+    sub.display_timestamp.end = sub.original_timestamp.end + userPreferences::user_video_preferences.subtitle_delay_offset_ms;
+
+    sub_decoder->adjust_queued_subtitle_delays(userPreferences::user_video_preferences.subtitle_delay_offset_ms);
+
+}
+
+static void set_new_subtitle_location(glm::vec2& location, const subtitleLocation& location_enum, const float& width, const float& height) {
+
+    location = Utility::GET_SUBTITLE_LOCATION(location_enum, width, height);
+
+}
+
 void videoPlayer::start() {
 
     glfwSetFramebufferSizeCallback(GLutil::window, &videoPlayer::framebuffer_size_callback); 
     glfwSetMouseButtonCallback(GLutil::window, &videoPlayer::mouse_button_callback);
     glfwSetScrollCallback(GLutil::window, &videoPlayer::scroll_callback);
 
-    GLutil::init_video_texture(current_data.video_data.width, current_data.video_data.height);
+    GLutil::init_video_texture(display.current_data.video_data.width, display.current_data.video_data.height);
 
     constexpr int draw_overlay_time_ms = 1250;
     constexpr int update_progress_delay_ms = 5000;
@@ -178,12 +192,12 @@ void videoPlayer::start() {
     int curr_screen_width, curr_screen_height;
     float mouse_x_normalized, mouse_y_normalized;
 
-    set_new_language_display_text();
-    set_new_menu_display_text();
+    set_new_language_display_text(display.language_choice_display_text);
+    set_new_menu_display_text(display.settings_menu_display_text);
 
     glfwGetWindowSize(GLutil::window, &curr_screen_width, &curr_screen_height);
 
-    current_data.subtitle_location = GET_SUBTITLE_LOCATION(userPreferences::user_video_preferences.subtitle_location, float(curr_screen_width), float(curr_screen_height));
+    display.current_data.subtitle_location = Utility::GET_SUBTITLE_LOCATION(userPreferences::user_video_preferences.subtitle_location, float(curr_screen_width), float(curr_screen_height));
 
     glfwSwapInterval(1);
 
@@ -219,117 +233,134 @@ void videoPlayer::start() {
             subtitle_decoder->start_decoder_thread();
             audio_player->startup_thread();
 
-            current_data.subtitle.display_timestamp.end = 0; // in case subtitle had not displayed yet set the end timestamp = 0 so a new one is displayed(the updated one)
-            current_data.last_progress_bar_update_time_ms = 0; // for same basic reason
+            display.current_data.subtitle.display_timestamp.end = 0; // in case subtitle had not displayed yet set the end timestamp = 0 so a new one is displayed(the updated one)
+            display.current_data.last_progress_bar_update_time_ms = 0; // for same basic reason
 
         }
 
-        if (LANGUAGE_CHOICES_ALTERED) { // user scrolled through languages
+        while (!request_queue.empty()) {
 
-            set_new_language_display_text();
+            Request next = request_queue.back();
 
-            LANGUAGE_CHOICES_ALTERED = false;
+            switch (next) {
 
-        }
+                case Request::ALTER_LANGUAGE_CHOICES:
+                    set_new_language_display_text
+                    (
+                        display.language_choice_display_text
+                    );
 
-        if (SETTINGS_MENU_ALTERED) { // user changed a setting that requires text to be updated
+                    break;
 
-            set_new_menu_display_text();
+                case Request::ALTER_SETTING:
+                    set_new_menu_display_text
+                    (
+                        display.settings_menu_display_text
+                    );
 
-            SETTINGS_MENU_ALTERED = false;
+                    break;
+
+                case Request::ALTER_SUBTITLE_DELAY:
+                    set_new_subtitle_delay
+                    (
+                        display.current_data.subtitle,
+                        userPreferences::user_video_preferences.subtitle_delay_offset_ms, 
+                        subtitle_decoder
+                    );
+
+                    break;
+
+                case Request::ALTER_SUBTITLE_LOCATION:
+                    set_new_subtitle_location
+                    (
+                        display.current_data.subtitle_location,
+                        userPreferences::user_video_preferences.subtitle_location,
+                        display.current_data.screen_width,
+                        display.current_data.screen_height
+                    );
+
+                    break;
+
+                default: 
+                    break;
+
+            }
+
+            request_queue.pop_back();
 
         }
 
         if (LANGUAGE_ALTERED != 0) {
 
-            userPreferences::alter_translate_to(GET_LANGUAGE_CHARACTER_CODE(subtitleUtil::get_language_choice(LANGUAGE_ALTERED)));
-            set_new_menu_display_text();
+            userPreferences::alter_translate_to(Utility::GET_LANGUAGE_CHARACTER_CODE(subtitleUtil::get_language_choice(LANGUAGE_ALTERED)));
+            set_new_menu_display_text(display.settings_menu_display_text);
 
             LANGUAGE_ALTERED = 0;
             subtitle_decoder->seek_subtitle_location(elapsed, true); // to reset subtitles and re translate
             subtitle_decoder->start_decoder_thread();
             
             while (!subtitle_decoder->has_subtitle()) {} // we do this so that subtitles are displayed again immediately after switching and are correct to the switch
-            current_data.subtitle = subtitle_decoder->get_next_subtitle();
-
-        }
-
-        if (SUBTITLE_DELAY_ALTERED) {
-
-            current_data.subtitle.display_timestamp.start = current_data.subtitle.original_timestamp.start + userPreferences::user_video_preferences.subtitle_delay_offset_ms;
-            current_data.subtitle.display_timestamp.end = current_data.subtitle.original_timestamp.end + userPreferences::user_video_preferences.subtitle_delay_offset_ms;
-
-            subtitle_decoder->adjust_queued_subtitle_delays(userPreferences::user_video_preferences.subtitle_delay_offset_ms);
-
-            SUBTITLE_DELAY_ALTERED = false;
-
-        }
-
-        if (SUBTITLE_LOCATION_ALTERED) {
-
-            current_data.subtitle_location = GET_SUBTITLE_LOCATION(userPreferences::user_video_preferences.subtitle_location, current_data.screen_width, current_data.screen_height);
-
-            SUBTITLE_LOCATION_ALTERED = false;
+            display.current_data.subtitle = subtitle_decoder->get_next_subtitle();
 
         }
 
         glfwGetWindowSize(GLutil::window, &curr_screen_width, &curr_screen_height);
 
-        if (curr_screen_height != current_data.screen_height || curr_screen_width != current_data.screen_width) {
+        if (curr_screen_height != display.current_data.screen_height || curr_screen_width != display.current_data.screen_width) {
 
-            current_data.screen_height = float(curr_screen_height);
-            current_data.screen_width = float(curr_screen_width);
+            display.current_data.screen_height = float(curr_screen_height);
+            display.current_data.screen_width = float(curr_screen_width);
 
-            renderer->set_font_projection(current_data.screen_width, current_data.screen_height);
-            current_data.subtitle_location = GET_SUBTITLE_LOCATION(userPreferences::user_video_preferences.subtitle_location, float(current_data.screen_width), float(current_data.screen_height));
+            renderer->set_font_projection(display.current_data.screen_width, display.current_data.screen_height);
+            display.current_data.subtitle_location = Utility::GET_SUBTITLE_LOCATION(userPreferences::user_video_preferences.subtitle_location, float(display.current_data.screen_width), float(display.current_data.screen_height));
 
         }
 
         glfwGetCursorPos(GLutil::window, &xpos, &ypos);
 
-        if (xpos != current_data.mouse_xpos || ypos != current_data.mouse_ypos) {
+        if (xpos != display.current_data.mouse_xpos || ypos != display.current_data.mouse_ypos) {
 
-            current_data.mouse_xpos = xpos;
-            current_data.mouse_ypos = ypos;
+            display.current_data.mouse_xpos = xpos;
+            display.current_data.mouse_ypos = ypos;
 
-            mouse_y_normalized = 1.0f - 2.0f * float(ypos) / current_data.screen_height;
-            mouse_x_normalized = -1.0f + 2.0f * float(xpos) / current_data.screen_width;
+            mouse_y_normalized = 1.0f - 2.0f * float(ypos) / display.current_data.screen_height;
+            mouse_x_normalized = -1.0f + 2.0f * float(xpos) / display.current_data.screen_width;
 
             custom_cursor_pos_callback(mouse_x_normalized, mouse_y_normalized);
 
-            current_data.last_mouse_move_time_ms = elapsed;
+            display.current_data.last_mouse_move_time_ms = elapsed;
             render_overlay = true;
 
         }
 
         elapsed = video_decoder->get_current_audio_pts_val();
 
-        if (elapsed >= current_data.subtitle.display_timestamp.end) {
+        if (elapsed >= display.current_data.subtitle.display_timestamp.end) {
 
             if (subtitle_decoder->has_subtitle()) {
 
-                current_data.subtitle = subtitle_decoder->get_next_subtitle();
+                display.current_data.subtitle = subtitle_decoder->get_next_subtitle();
 
             }
 
         }
 
-        if (elapsed - current_data.last_progress_bar_update_time_ms >= update_progress_delay_ms) {
+        if (elapsed - display.current_data.last_progress_bar_update_time_ms >= update_progress_delay_ms) {
 
-            current_data.last_progress_bar_update_time_ms = elapsed;
+            display.current_data.last_progress_bar_update_time_ms = elapsed;
 
             renderer->update_video_progress(video_duration, elapsed);
 
         }
 
-        if (elapsed >= current_data.subtitle.display_timestamp.start) {
+        if (elapsed >= display.current_data.subtitle.display_timestamp.start) {
 
-            renderer->draw_text(current_data.subtitle.text_codepoints, current_data.subtitle_location.x, current_data.subtitle_location.y, userPreferences::user_video_preferences.subtitle_scale);
-            renderer->draw_text(current_data.subtitle.translated_text_codepoints, current_data.subtitle_location.x, current_data.subtitle_location.y - 40.0f, userPreferences::user_video_preferences.subtitle_scale);
+            renderer->draw_text(display.current_data.subtitle.text_codepoints, display.current_data.subtitle_location.x, display.current_data.subtitle_location.y, userPreferences::user_video_preferences.subtitle_scale);
+            renderer->draw_text(display.current_data.subtitle.translated_text_codepoints, display.current_data.subtitle_location.x, display.current_data.subtitle_location.y - 40.0f, userPreferences::user_video_preferences.subtitle_scale);
 
         }
 
-        if (current_data.last_mouse_move_time_ms + draw_overlay_time_ms <= elapsed) {
+        if (display.current_data.last_mouse_move_time_ms + draw_overlay_time_ms <= elapsed) {
 
             render_overlay = false;
 
@@ -339,32 +370,36 @@ void videoPlayer::start() {
 
             renderer->draw_language_select_menu();
 
-            renderer->draw_text(
-                language_choice_display_text.choice_one, 
-                language_choice_display_text.choice_one_text_location.topleftX, language_choice_display_text.choice_one_text_location.bottomrightX, 
-                language_choice_display_text.choice_one_text_location.topleftY, language_choice_display_text.choice_one_text_location.bottomrightY, 
-                current_data.screen_width, current_data.screen_height
+            renderer->draw_text
+            (
+                display.language_choice_display_text.choice_one, 
+                display.language_choice_display_text.choice_one_text_location.topleftX, display.language_choice_display_text.choice_one_text_location.bottomrightX, 
+                display.language_choice_display_text.choice_one_text_location.topleftY, display.language_choice_display_text.choice_one_text_location.bottomrightY, 
+                display.current_data.screen_width, display.current_data.screen_height
             );
 
-            renderer->draw_text(
-                language_choice_display_text.choice_two, 
-                language_choice_display_text.choice_two_text_location.topleftX, language_choice_display_text.choice_two_text_location.bottomrightX, 
-                language_choice_display_text.choice_two_text_location.topleftY, language_choice_display_text.choice_two_text_location.bottomrightY, 
-                current_data.screen_width, current_data.screen_height
+            renderer->draw_text
+            (
+                display.language_choice_display_text.choice_two, 
+                display.language_choice_display_text.choice_two_text_location.topleftX, display.language_choice_display_text.choice_two_text_location.bottomrightX, 
+                display.language_choice_display_text.choice_two_text_location.topleftY, display.language_choice_display_text.choice_two_text_location.bottomrightY, 
+                display.current_data.screen_width, display.current_data.screen_height
             );
 
-            renderer->draw_text(
-                language_choice_display_text.choice_three, 
-                language_choice_display_text.choice_three_text_location.topleftX, language_choice_display_text.choice_three_text_location.bottomrightX, 
-                language_choice_display_text.choice_three_text_location.topleftY, language_choice_display_text.choice_three_text_location.bottomrightY, 
-                current_data.screen_width, current_data.screen_height
+            renderer->draw_text
+            (
+                display.language_choice_display_text.choice_three, 
+                display.language_choice_display_text.choice_three_text_location.topleftX, display.language_choice_display_text.choice_three_text_location.bottomrightX, 
+                display.language_choice_display_text.choice_three_text_location.topleftY, display.language_choice_display_text.choice_three_text_location.bottomrightY, 
+                display.current_data.screen_width, display.current_data.screen_height
             );
 
-            renderer->draw_text(
-                language_choice_display_text.choice_four, 
-                language_choice_display_text.choice_four_text_location.topleftX, language_choice_display_text.choice_four_text_location.bottomrightX, 
-                language_choice_display_text.choice_four_text_location.topleftY, language_choice_display_text.choice_four_text_location.bottomrightY, 
-                current_data.screen_width, current_data.screen_height
+            renderer->draw_text
+            (
+                display.language_choice_display_text.choice_four, 
+                display.language_choice_display_text.choice_four_text_location.topleftX, display.language_choice_display_text.choice_four_text_location.bottomrightX, 
+                display.language_choice_display_text.choice_four_text_location.topleftY, display.language_choice_display_text.choice_four_text_location.bottomrightY, 
+                display.current_data.screen_width, display.current_data.screen_height
             );
 
         }
@@ -373,48 +408,54 @@ void videoPlayer::start() {
 
             renderer->draw_settings_menu();
 
-            renderer->draw_text(
-                settings_menu_display_text.color, 
-                settings_menu_display_text.color_text_location.topleftX, settings_menu_display_text.color_text_location.bottomrightX, 
-                settings_menu_display_text.color_text_location.topleftY, settings_menu_display_text.color_text_location.bottomrightY, 
-                current_data.screen_width, current_data.screen_height
+            renderer->draw_text
+            (
+                display.settings_menu_display_text.color, 
+                display.settings_menu_display_text.color_text_location.topleftX, display.settings_menu_display_text.color_text_location.bottomrightX, 
+                display.settings_menu_display_text.color_text_location.topleftY, display.settings_menu_display_text.color_text_location.bottomrightY, 
+                display.current_data.screen_width, display.current_data.screen_height
             );
 
-            renderer->draw_text(
-                settings_menu_display_text.subtitle_location, 
-                settings_menu_display_text.subtitle_location_text_location.topleftX, settings_menu_display_text.subtitle_location_text_location.bottomrightX, 
-                settings_menu_display_text.subtitle_location_text_location.topleftY, settings_menu_display_text.subtitle_location_text_location.bottomrightY, 
-                current_data.screen_width, current_data.screen_height
+            renderer->draw_text
+            (
+                display.settings_menu_display_text.subtitle_location, 
+                display.settings_menu_display_text.subtitle_location_text_location.topleftX, display.settings_menu_display_text.subtitle_location_text_location.bottomrightX, 
+                display.settings_menu_display_text.subtitle_location_text_location.topleftY, display.settings_menu_display_text.subtitle_location_text_location.bottomrightY, 
+                display.current_data.screen_width, display.current_data.screen_height
             );
 
-            renderer->draw_text(
-                settings_menu_display_text.subtitle_delay, 
-                settings_menu_display_text.subtitle_delay_text_location.topleftX, settings_menu_display_text.subtitle_delay_text_location.bottomrightX, 
-                settings_menu_display_text.subtitle_delay_text_location.topleftY, settings_menu_display_text.subtitle_delay_text_location.bottomrightY, 
-                current_data.screen_width, current_data.screen_height
+            renderer->draw_text
+            (
+                display.settings_menu_display_text.subtitle_delay, 
+                display.settings_menu_display_text.subtitle_delay_text_location.topleftX, display.settings_menu_display_text.subtitle_delay_text_location.bottomrightX, 
+                display.settings_menu_display_text.subtitle_delay_text_location.topleftY, display.settings_menu_display_text.subtitle_delay_text_location.bottomrightY, 
+                display.current_data.screen_width, display.current_data.screen_height
             );
 
-            renderer->draw_text(
-                settings_menu_display_text.subtitle_scale, 
-                settings_menu_display_text.subtitle_scale_text_location.topleftX, settings_menu_display_text.subtitle_scale_text_location.bottomrightX, 
-                settings_menu_display_text.subtitle_scale_text_location.topleftY, settings_menu_display_text.subtitle_scale_text_location.bottomrightY, 
-                current_data.screen_width, current_data.screen_height
+            renderer->draw_text
+            (
+                display.settings_menu_display_text.subtitle_scale, 
+                display.settings_menu_display_text.subtitle_scale_text_location.topleftX, display.settings_menu_display_text.subtitle_scale_text_location.bottomrightX, 
+                display.settings_menu_display_text.subtitle_scale_text_location.topleftY, display.settings_menu_display_text.subtitle_scale_text_location.bottomrightY, 
+                display.current_data.screen_width, display.current_data.screen_height
             );
 
-            renderer->draw_text(
-                settings_menu_display_text.translate_to,
-                settings_menu_display_text.translate_to_text_location.topleftX, settings_menu_display_text.translate_to_text_location.bottomrightX, 
-                settings_menu_display_text.translate_to_text_location.topleftY, settings_menu_display_text.translate_to_text_location.bottomrightY, 
-                current_data.screen_width, current_data.screen_height
+            renderer->draw_text
+            (
+                display.settings_menu_display_text.translate_to,
+                display.settings_menu_display_text.translate_to_text_location.topleftX, display.settings_menu_display_text.translate_to_text_location.bottomrightX, 
+                display.settings_menu_display_text.translate_to_text_location.topleftY, display.settings_menu_display_text.translate_to_text_location.bottomrightY, 
+                display.current_data.screen_width, display.current_data.screen_height
             );
 
         }
 
         if (render_timestamp) {
 
-            renderer->draw_text(
-                current_data.display_time_codepoints, 
-                float(current_data.mouse_xpos), 
+            renderer->draw_text
+            (
+                display.current_data.display_time_codepoints, 
+                float(display.current_data.mouse_xpos), 
                 CONSTANTS::TRANSLATION::DISPLAY_TIME_Y_TRANSLATION, 
                 CONSTANTS::TRANSLATION::TINY_TEXT_SCALE_DOWN + 0.1f
             );
@@ -450,8 +491,8 @@ void videoPlayer::sync_audio() {
 
         if (!audio_player->is_queue_full()) {
 
-            current_data.audio_data = video_decoder->get_next_audio_pcm_data();
-            audio_player->push_to_queue(current_data.audio_data);
+            display.current_data.audio_data = video_decoder->get_next_audio_pcm_data();
+            audio_player->push_to_queue(display.current_data.audio_data);
 
         }
 
@@ -463,12 +504,12 @@ void videoPlayer::sync_video() {
 
     if (video_decoder->has_video_data() && video_decoder->get_current_video_pts_val() <= elapsed - 300) { // - 300 to let video get a little ahead if fps is held back
 
-        current_data.video_data = video_decoder->get_next_video_data();
+        display.current_data.video_data = video_decoder->get_next_video_data();
         
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, GLutil::texture_ids.at(textureName::MOVIE));
 
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, current_data.video_data.width, current_data.video_data.height, GL_RGB, GL_UNSIGNED_BYTE, current_data.video_data.rgb_pixels.data());
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, display.current_data.video_data.width, display.current_data.video_data.height, GL_RGB, GL_UNSIGNED_BYTE, display.current_data.video_data.rgb_pixels.data());
 
     }
 
@@ -494,7 +535,7 @@ void videoPlayer::perform_button_action(const buttonName& name, const double& mo
 
             if (!SETTINGS_OPEN) break;
 
-            SETTINGS_MENU_ALTERED = true;
+            request_queue.emplace_back(Request::ALTER_SETTING);
             userPreferences::alter_font_color(false);
 
             break;
@@ -503,7 +544,7 @@ void videoPlayer::perform_button_action(const buttonName& name, const double& mo
 
             if (!SETTINGS_OPEN) break;
 
-            SETTINGS_MENU_ALTERED = true;
+            request_queue.emplace_back(Request::ALTER_SETTING);
             userPreferences::alter_font_color(true);
 
             break;
@@ -512,8 +553,8 @@ void videoPlayer::perform_button_action(const buttonName& name, const double& mo
 
             if (!SETTINGS_OPEN) break;
 
-            SETTINGS_MENU_ALTERED = true;
-            SUBTITLE_DELAY_ALTERED = true;
+            request_queue.emplace_back(Request::ALTER_SETTING);
+            request_queue.emplace_back(Request::ALTER_SUBTITLE_DELAY);
             userPreferences::alter_subtitle_delay(false);
 
             break;
@@ -522,8 +563,8 @@ void videoPlayer::perform_button_action(const buttonName& name, const double& mo
 
             if (!SETTINGS_OPEN) break;
 
-            SETTINGS_MENU_ALTERED = true;
-            SUBTITLE_DELAY_ALTERED = true;
+            request_queue.emplace_back(Request::ALTER_SETTING);
+            request_queue.emplace_back(Request::ALTER_SUBTITLE_DELAY);
             userPreferences::alter_subtitle_delay(true);
 
             break;
@@ -540,8 +581,8 @@ void videoPlayer::perform_button_action(const buttonName& name, const double& mo
 
             if (!SETTINGS_OPEN) break;
 
-            SUBTITLE_LOCATION_ALTERED = true;
-            SETTINGS_MENU_ALTERED = true;
+            request_queue.emplace_back(Request::ALTER_SETTING);
+            request_queue.emplace_back(Request::ALTER_SUBTITLE_LOCATION);
             userPreferences::alter_subtitle_location(false);
 
             break;
@@ -550,8 +591,8 @@ void videoPlayer::perform_button_action(const buttonName& name, const double& mo
 
             if (!SETTINGS_OPEN) break;
 
-            SUBTITLE_LOCATION_ALTERED = true;
-            SETTINGS_MENU_ALTERED = true;
+            request_queue.emplace_back(Request::ALTER_SETTING);
+            request_queue.emplace_back(Request::ALTER_SUBTITLE_LOCATION);
             userPreferences::alter_subtitle_location(true);
 
             break;
@@ -560,7 +601,7 @@ void videoPlayer::perform_button_action(const buttonName& name, const double& mo
 
             if (!SETTINGS_OPEN) break;
 
-            SETTINGS_MENU_ALTERED = true;
+            request_queue.emplace_back(Request::ALTER_SETTING);
             userPreferences::alter_subtitle_scale(false);
 
             break;
@@ -569,7 +610,7 @@ void videoPlayer::perform_button_action(const buttonName& name, const double& mo
 
             if (!SETTINGS_OPEN) break;
 
-            SETTINGS_MENU_ALTERED = true;
+            request_queue.emplace_back(Request::ALTER_SETTING);
             userPreferences::alter_subtitle_scale(true);
 
             break;
@@ -584,7 +625,7 @@ void videoPlayer::perform_button_action(const buttonName& name, const double& mo
 
             if (!LANGUAGE_ALTER_MENU_OPEN) break;
 
-            SETTINGS_MENU_ALTERED = true;
+            request_queue.emplace_back(Request::ALTER_SETTING);
             LANGUAGE_ALTERED = decide_language_altered(mouse_x, mouse_y);
 
             break;
@@ -704,7 +745,7 @@ void videoPlayer::custom_cursor_pos_callback(const float& xpos, const float& ypo
         int64_t seconds = static_cast<int64_t>(display_time_ms / 1000);
 
         std::string display_time = Utility::format_time_hhmmss(seconds);
-        current_data.display_time_codepoints = Utility::get_codepoints_from_string(display_time);
+        display.current_data.display_time_codepoints = Utility::get_codepoints_from_string(display_time);
 
     } else {
 
@@ -738,7 +779,7 @@ void videoPlayer::scroll_callback(GLFWwindow* window, double xoff, double yoff) 
 
                 subtitleUtil::language_choice_one_display_idx--;
 
-                LANGUAGE_CHOICES_ALTERED = true;
+                request_queue.emplace_back(Request::ALTER_LANGUAGE_CHOICES);
 
             }
 
@@ -750,7 +791,7 @@ void videoPlayer::scroll_callback(GLFWwindow* window, double xoff, double yoff) 
 
                 subtitleUtil::language_choice_one_display_idx++;
 
-                LANGUAGE_CHOICES_ALTERED = true;
+                request_queue.emplace_back(Request::ALTER_LANGUAGE_CHOICES);
 
             }
 

@@ -2,8 +2,8 @@
 #ifndef VIDEODECODER_H
 #define VIDEODECODER_H
 
-#include "include/utility.hpp"
-#include "include/decoder.hpp"
+#include "include/utility/utility.hpp"
+#include "include/video_player/decoder.hpp"
 
 struct videoData {
 

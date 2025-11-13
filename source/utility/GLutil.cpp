@@ -1,8 +1,117 @@
 
-#include "include/GLutil.hpp"
+#include "include/utility/GLutil.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+static unsigned int load_texture(const std::string file) {
+
+    stbi_set_flip_vertically_on_load(true);
+
+    unsigned int texture;
+
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nr_channels;
+    unsigned char* data = stbi_load(file.c_str(), &width, &height, &nr_channels, 0);
+
+    if (data) {
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+    }
+
+    else {
+
+        throw std::runtime_error("FAILED TO LOAD IMAGE WITH STB IMAGE");
+
+    }
+
+    stbi_image_free(data);
+
+    return texture;
+
+}
+
+static void init_overlay_texture
+(
+    std::unordered_map<textureName, unsigned int>& texture_ids,
+    const textureName& tex, unsigned int& tex_id, const int& tex_unit, 
+    const std::string& tex_path, const char* png_file, 
+    const std::string& err_message
+) 
+{
+
+    glActiveTexture(GL_TEXTURE0 + tex_unit);
+
+    try {
+
+        tex_id = load_texture(tex_path + png_file);
+
+    }
+
+    catch (std::exception& e) {
+
+        std::cerr << e.what() << err_message << std::endl;
+        return;
+
+    }
+
+    texture_ids[tex] = tex_id;
+
+}
+
+static void init_texture_geometry
+(
+    std::unordered_map<textureName, unsigned int>& texture_vaos, std::unordered_map<textureName, unsigned int>& texture_ebos,
+    const float* vertices, std::size_t vertices_size, 
+    const unsigned int* indices, std::size_t indices_size, 
+    const textureName& texture_name,
+    int vertex_attrib1, int attrib1_size, int attrib1_stride, void* attrib1_offset, 
+    int vertex_attrib2, int attrib2_size, int attrib2_stride, void* attrib2_offset
+)
+{
+
+    unsigned int VBO, VAO, EBO;
+
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    texture_vaos[texture_name] = VAO;
+
+    if (indices) {
+
+        glGenBuffers(1, &EBO);
+
+        texture_ebos[texture_name] = EBO;
+
+    }
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, GL_STATIC_DRAW);
+
+    if (indices) {
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_size, indices, GL_STATIC_DRAW);
+
+    }
+
+    glVertexAttribPointer(vertex_attrib1, attrib1_size, GL_FLOAT, GL_FALSE, attrib1_stride, attrib1_offset);
+    glEnableVertexAttribArray(vertex_attrib1);
+
+    glVertexAttribPointer(vertex_attrib2, attrib2_size, GL_FLOAT, GL_FALSE, attrib2_stride, attrib2_offset);
+    glEnableVertexAttribArray(vertex_attrib2);
+
+}
 
 namespace GLutil {
 
@@ -72,6 +181,10 @@ namespace GLutil {
 
     }
 
+    std::unordered_map<textureName, unsigned int> texture_ids;
+    std::unordered_map<textureName, unsigned int> texture_vaos;
+    std::unordered_map<textureName, unsigned int> texture_ebos;
+
     void init_texture_atlas() {
 
         glActiveTexture(GL_TEXTURE0 + CONSTANTS::TEXTURES::FONT_TEXTURE);
@@ -93,88 +206,9 @@ namespace GLutil {
 
     }
 
-    unsigned int load_texture(const std::string file) {
-
-        stbi_set_flip_vertically_on_load(true);
-
-        unsigned int texture;
-
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        int width, height, nr_channels;
-        unsigned char* data = stbi_load(file.c_str(), &width, &height, &nr_channels, 0);
-
-        if (data) {
-
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
-
-        }
-
-        else {
-
-            throw std::runtime_error("FAILED TO LOAD IMAGE WITH STB IMAGE");
-
-        }
-
-        stbi_image_free(data);
-
-        return texture;
-
-    }
-
-    std::unordered_map<textureName, unsigned int> texture_ids;
-    std::unordered_map<textureName, unsigned int> texture_vaos;
-    std::unordered_map<textureName, unsigned int> texture_ebos;
-
-    void init_texture_geometry(float* vertices, std::size_t vertices_size, unsigned int* indices, std::size_t indices_size, const textureName& texture_name,
-        int vertex_attrib1, int attrib1_size, int attrib1_stride, void* attrib1_offset, int vertex_attrib2, int attrib2_size, int attrib2_stride, void* attrib2_offset)
-        
-    {
-
-        unsigned int VBO, VAO, EBO;
-
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-
-        texture_vaos[texture_name] = VAO;
-
-        if (indices) {
-
-            glGenBuffers(1, &EBO);
-
-            texture_ebos[texture_name] = EBO;
-
-        }
-
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, vertices_size, vertices, GL_STATIC_DRAW);
-
-        if (indices) {
-
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_size, indices, GL_STATIC_DRAW);
-
-        }
-
-        glVertexAttribPointer(vertex_attrib1, attrib1_size, GL_FLOAT, GL_FALSE, attrib1_stride, attrib1_offset);
-        glEnableVertexAttribArray(vertex_attrib1);
-
-        glVertexAttribPointer(vertex_attrib2, attrib2_size, GL_FLOAT, GL_FALSE, attrib2_stride, attrib2_offset);
-        glEnableVertexAttribArray(vertex_attrib2);
-
-    }
-
     void init_video_texture(const int& frame_width, const int& frame_height) {
         
-        float vertices[] = {
+        constexpr float vertices[] = {
 
             -1.0f,  1.0f,     0.0f, 0.0f, 
             -1.0f,  -1.0f,    0.0f, 1.0f, 
@@ -188,6 +222,7 @@ namespace GLutil {
 
         init_texture_geometry
         (
+            texture_vaos, texture_ebos,
             vertices, sizeof(vertices), 
             nullptr, 0, 
             textureName::MOVIE,
@@ -217,8 +252,9 @@ namespace GLutil {
 
     void init_overlay_textures() {
 
-        const std::string tex_path = GET_RESOURCE_FOLDER_PATH() + "textures/";
+        // init the textures
 
+        const std::string tex_path = GET_RESOURCE_FOLDER_PATH() + "textures/";
         const std::string err_message = "\nDid you run cmake --install .?"
         "\nPath=" + tex_path + ""
         "\nVerify that this path exists."
@@ -226,70 +262,53 @@ namespace GLutil {
         "\nIf you do not, redownload the textures from the GitHub repository and place them in the expected path.";
 
         unsigned int progress_bar_texture_id;
-        glActiveTexture(GL_TEXTURE0 + CONSTANTS::TEXTURES::PROGRESS_BAR_TEXTURE);
-        try {
-
-            progress_bar_texture_id = load_texture(tex_path + "bar.png");
-
-        }
-        catch (std::exception& e) {
-
-            std::cerr << e.what() << err_message << std::endl;
-
-        }
-
         unsigned int settings_wheel_texture_id;
-        glActiveTexture(GL_TEXTURE0 + CONSTANTS::TEXTURES::SETTINGS_WHEEL_TEXTURE);
-        try {
-
-            settings_wheel_texture_id = load_texture(tex_path + "settings_wheel.png");
-
-        }
-        catch (std::exception& e) {
-
-            std::cerr << e.what() << err_message << std::endl;
-
-        }
-        
         unsigned int settings_menu_texture_id;
-        glActiveTexture(GL_TEXTURE0 + CONSTANTS::TEXTURES::SETTINGS_MENU_TEXTURE);
-        try {
-
-            settings_menu_texture_id = load_texture(tex_path + "settingsmenu.png");
-
-        }
-        catch (std::exception& e) {
-
-            std::cerr << e.what() << err_message << std::endl;
-
-        }
-
         unsigned int language_select_menu_texture_id;
-        glActiveTexture(GL_TEXTURE0 + CONSTANTS::TEXTURES::LANGUAGE_SELECT_TEXTURE);
-        try {
 
-            language_select_menu_texture_id = load_texture(tex_path + "languageselect.png");
+        init_overlay_texture
+        (
+            texture_ids,
+            textureName::PROGRESS_BAR, progress_bar_texture_id, CONSTANTS::TEXTURES::PROGRESS_BAR_TEXTURE, 
+            tex_path, "bar.png", 
+            err_message
+        );
 
-        }
-        catch (std::exception& e) {
+        init_overlay_texture
+        (
+            texture_ids,
+            textureName::SETTINGS_WHEEL, settings_wheel_texture_id, CONSTANTS::TEXTURES::SETTINGS_WHEEL_TEXTURE, 
+            tex_path, "settings_wheel.png",
+            err_message
+        );
 
-            std::cerr << e.what() << err_message << std::endl;
+        init_overlay_texture
+        (
+            texture_ids,
+            textureName::SETTINGS_MENU, settings_menu_texture_id, CONSTANTS::TEXTURES::SETTINGS_MENU_TEXTURE, 
+            tex_path, "settingsmenu.png", 
+            err_message
+        );
 
-        }
+        init_overlay_texture
+        (
+            texture_ids,
+            textureName::LANGUAGE_SELECT, language_select_menu_texture_id, CONSTANTS::TEXTURES::LANGUAGE_SELECT_TEXTURE, 
+            tex_path, "languageselect.png", 
+            err_message
+        );
 
-        texture_ids[textureName::PROGRESS_BAR] = progress_bar_texture_id;
-        texture_ids[textureName::SETTINGS_WHEEL] = settings_wheel_texture_id;
-        texture_ids[textureName::SETTINGS_MENU] = settings_menu_texture_id;
-        texture_ids[textureName::LANGUAGE_SELECT] = language_select_menu_texture_id;
 
-        unsigned int indices[] = {
+        // now setup geometry & set the corners of each texture for the button transformations to be according to size and location of whole texture
+
+        constexpr unsigned int indices[] = {
 
             0, 1, 3,
             1, 2, 3
 
         };
 
-        float progress_bar_vertices[] = {
+        constexpr float progress_bar_vertices[] = {
 
             0.9f, 0.8f, 0.0f,       1.0f, 1.0f,
             0.9f, -0.8f, 0.0f,      1.0f, 0.0f,
@@ -298,7 +317,7 @@ namespace GLutil {
 
         };
 
-        float vertices[] = {
+        constexpr float vertices[] = {
 
             0.5f, 0.5f, 0.0f,       1.0f, 1.0f,   
             0.5f, -0.5f, 0.0f,      1.0f, 0.0f, 
@@ -307,15 +326,26 @@ namespace GLutil {
 
         };
 
-        Buttons::set_corner_values(wholeTexture::LOADING_BAR, progress_bar_vertices[15], progress_bar_vertices[16], progress_bar_vertices[5], progress_bar_vertices[6]);
-        Buttons::set_corner_values(wholeTexture::SETTINGS_WHEEL, vertices[15], vertices[16], vertices[5], vertices[6]);  
-        Buttons::set_corner_values(wholeTexture::SETTINGS_MENU, vertices[15], vertices[16], vertices[5], vertices[6]);
-        Buttons::set_corner_values(wholeTexture::LANGUAGE_SELECT_MENU, vertices[15], vertices[16], vertices[5], vertices[6]);
-
         constexpr int stride = 5 * sizeof(float);
+
+        constexpr float tlx_progress_bar = progress_bar_vertices[15];
+        constexpr float tly_progress_bar = progress_bar_vertices[16];
+        constexpr float brx_progress_bar = progress_bar_vertices[5];
+        constexpr float bry_progress_bar = progress_bar_vertices[6];
+
+        constexpr float base_tlx = vertices[15];
+        constexpr float base_tly = vertices[16];
+        constexpr float base_brx = vertices[5];
+        constexpr float base_bry = vertices[6];
+
+        Buttons::set_corner_values(wholeTexture::LOADING_BAR, tlx_progress_bar, tly_progress_bar, brx_progress_bar, bry_progress_bar);
+        Buttons::set_corner_values(wholeTexture::SETTINGS_WHEEL, base_tlx, base_tly, base_brx, base_bry);  
+        Buttons::set_corner_values(wholeTexture::SETTINGS_MENU, base_tlx, base_tly, base_brx, base_bry);
+        Buttons::set_corner_values(wholeTexture::LANGUAGE_SELECT_MENU, base_tlx, base_tly, base_brx, base_bry);
 
         init_texture_geometry
         (
+            texture_vaos, texture_ebos,
             progress_bar_vertices, sizeof(progress_bar_vertices),
             indices, sizeof(indices),
             textureName::PROGRESS_BAR, 
@@ -326,6 +356,7 @@ namespace GLutil {
 
         init_texture_geometry
         (
+            texture_vaos, texture_ebos,
             vertices, sizeof(vertices), 
             indices, sizeof(indices), 
             textureName::SETTINGS_WHEEL,
@@ -334,7 +365,9 @@ namespace GLutil {
             4, 2, stride, (void*)(3 * sizeof(float))
         );
 
-        init_texture_geometry(
+        init_texture_geometry
+        (
+            texture_vaos, texture_ebos,
             vertices, sizeof(vertices),
             indices, sizeof(indices),
             textureName::SETTINGS_MENU,
@@ -343,7 +376,9 @@ namespace GLutil {
             4, 2, stride, (void*)(3 * sizeof(float))
         );
 
-        init_texture_geometry(
+        init_texture_geometry
+        (
+            texture_vaos, texture_ebos,
             vertices, sizeof(vertices),
             indices, sizeof(indices),
             textureName::LANGUAGE_SELECT,
@@ -353,6 +388,7 @@ namespace GLutil {
         );
 
     }
+
 
     glm::mat4 make_transformation(const float& x_offset, const float& y_offset, const float& x_scale, const float& y_scale) {
     

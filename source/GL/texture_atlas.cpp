@@ -1,5 +1,5 @@
 
-#include "include/texture_atlas.hpp"
+#include "include/GL/texture_atlas.hpp"
 
 /* Basically this entire file is thanks to the user https://gist.github.com/baines with his post https://gist.github.com/baines/b0f9e4be04ba4e6f56cab82eef5008ff 
    No idea who you are but thank you, and to anyone viewing this file go check his profile out */

@@ -12,7 +12,7 @@ extern "C" {
 #include <vector>
 #include <queue>
 
-#include "include/utility.hpp"
+#include "include/utility/utility.hpp"
 
 class audioPlayer {
 

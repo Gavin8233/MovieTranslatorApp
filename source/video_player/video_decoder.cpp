@@ -1,5 +1,5 @@
 
-#include "include/video_decoder.hpp"
+#include "include/video_player/video_decoder.hpp"
 
 videoDecoder::~videoDecoder() {
 

@@ -10,8 +10,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "include/variables.hpp"
-#include "include/subtitleUtil.hpp"
-#include "include/utility.hpp"
+#include "include/utility/subtitleUtil.hpp"
+#include "include/utility/utility.hpp"
 
 
 enum class buttonName {

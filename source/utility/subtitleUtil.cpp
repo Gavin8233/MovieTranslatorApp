@@ -1,5 +1,32 @@
 
-#include "include/subtitleUtil.hpp"
+#include "include/utility/subtitleUtil.hpp"
+
+static std::string GET_LANGUAGE_ENUM_AS_STRING(const Language& language) {
+
+    switch (language) {
+
+        case Language::GREEK: return "GREEK";
+        case Language::ENGLISH: return "ENGLISH";
+        case Language::SPANISH: return "SPANISH";
+        case Language::ARABIC: return "ARABIC";
+        case Language::CHINESE: return "CHINESE";
+        case Language::FRENCH: return "FRENCH";
+        case Language::GERMAN: return "GERMAN";
+        case Language::ITALIAN: return "ITALIAN";
+        case Language::JAPANESE: return "JAPANESE";
+        case Language::KOREAN: return "KOREAN";
+        case Language::MALAY: return "MALAY";
+        case Language::POLISH: return "POLISH";
+        case Language::PORTUGUESE: return "PORTUGUESE";
+        case Language::RUSSIAN: return "RUSSIAN";
+        case Language::THAI: return "THAI";
+        case Language::URDU: return "URDU";
+
+    }   
+
+    return "ENGLISH";
+
+}
 
 namespace subtitleUtil {
 

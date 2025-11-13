@@ -5,8 +5,8 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include "include/utility.hpp"
-#include "include/GLutil.hpp"
+#include "include/utility/utility.hpp"
+#include "include/utility/GLutil.hpp"
 
 #include <map>
 #include <iostream>
